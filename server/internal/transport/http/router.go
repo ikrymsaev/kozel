@@ -14,20 +14,20 @@ func InitRouter(wsHandler *ws.Handler) {
 	r = gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST"},
 		AllowHeaders:     []string{"Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
-			return origin == "http://localhost:5371"
+			return true
 		},
 		MaxAge: 12 * time.Hour,
 	}))
 
-	// r.POST("/ws/createRoom", wsHandler.CreateRoom)
+	r.POST("/ws/new_game", wsHandler.CreateRoom)
 	r.GET("/ws/join/:game_id", wsHandler.JoinRoom)
-	r.GET("/ws/getRooms", wsHandler.GetRooms)
+	r.GET("/ws/get_games", wsHandler.GetRooms)
 	r.GET("/ws/getClients/:roomId", wsHandler.GetClients)
 }
 

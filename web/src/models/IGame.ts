@@ -1,7 +1,7 @@
 import { IPlayer } from "./IPlayer"
 
 export interface IGame {
-  id: number
+  id: string
   name: string
   players: IPlayer[]
 }

@@ -6,7 +6,7 @@ export const MainLayout = ({ children }: PropsWithChildren) => {
   return (
     <div className={styles.container}>
       <div>
-        <h1>Kozel (MainLayout)</h1>
+        <h5>Kozel (MainLayout)</h5>
       </div>
       <div>
         {children}
