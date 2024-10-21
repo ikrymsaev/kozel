@@ -1,7 +1,9 @@
+import { MainLayout } from "./layouts/MainLayout/MainLayout"
+
 export const LobbyPage = () => {
   return (
-    <div>
+    <MainLayout>
       <h1>Lobby Page</h1>
-    </div>
+    </MainLayout>
   )
 }

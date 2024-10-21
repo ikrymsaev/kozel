@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import { wsService } from "../services/ws.service"
 import { useSearchParams } from "react-router-dom"
+import { MainLayout } from "./layouts/MainLayout/MainLayout"
 
 export const GamePage = () => {
   const [params] = useSearchParams()
@@ -20,8 +21,8 @@ export const GamePage = () => {
   }, [userId, username])
 
   return (
-    <div>
+    <MainLayout>
       <h1>Game Page</h1>
-    </div>
+    </MainLayout>
   )
 }
