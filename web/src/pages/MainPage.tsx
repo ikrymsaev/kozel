@@ -2,24 +2,34 @@ import { useEffect, useState } from "react";
 import { lobbyService } from "../services/lobby.service";
 import { useLobbyStore } from "../stores/lobby.store";
 import { useNavigate } from "react-router-dom";
+import { ILobby } from "../models/ILobby";
 
 export const MainPage = () => {
   const navigate = useNavigate()
 
   const activeGames = useLobbyStore((state) => state.activeGames)
+  const addLobby = useLobbyStore((state) => state.addLobby)
   
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    lobbyService.getGames()
+    lobbyService.getLobbyList()
   }, [])
 
+  useEffect(() => {
+    const es = new EventSource('http://localhost:8080/hub/watch_lobbies')
+    console.log("SSE opened, watching for lobbies...")
+    es.addEventListener('new_lobby', (event) => {
+      const data = JSON.parse(event.data) as ILobby
+      console.log("SSE new_lobby: ", data)
+      addLobby(data)
+    })
+  }, [addLobby])
+
   const handleNewGame = async () => {
-    console.log("handleNewGame");
     try {
       setLoading(true);
       await lobbyService.newGame();
-      await lobbyService.getGames()
     }
     finally {
       setLoading(false);

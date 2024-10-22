@@ -36,6 +36,7 @@ require (
 
 require (
 	github.com/gin-contrib/cors v1.7.2
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	golang.org/x/sys v0.24.0 // indirect
 )

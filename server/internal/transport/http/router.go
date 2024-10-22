@@ -1,7 +1,8 @@
 package router
 
 import (
-	"go-kozel/internal/transport/ws"
+	"go-kozel/internal/services"
+	"go-kozel/internal/transport/http/handlers"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -10,7 +11,7 @@ import (
 
 var r *gin.Engine
 
-func InitRouter(wsHandler *ws.Handler) {
+func InitRouter(hub *services.Hub) {
 	r = gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -25,10 +26,11 @@ func InitRouter(wsHandler *ws.Handler) {
 		MaxAge: 12 * time.Hour,
 	}))
 
-	r.POST("/ws/new_game", wsHandler.CreateRoom)
-	r.GET("/ws/join/:game_id", wsHandler.JoinRoom)
-	r.GET("/ws/get_games", wsHandler.GetRooms)
-	r.GET("/ws/getClients/:roomId", wsHandler.GetClients)
+	hubHandlers := handlers.NewHandler(hub)
+
+	r.POST("/hub/new_lobby", hubHandlers.NewLobby)
+	r.GET("/hub/lobbies", hubHandlers.GetLobbies)
+	r.GET("/hub/watch_lobbies", hubHandlers.WatchLobbies)
 }
 
 func Start(addr string) error {

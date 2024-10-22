@@ -8,14 +8,14 @@ class LobbyService {
     if (!user) return
 
     const { id, name } = user;
-    return await fetch('http://localhost:8080/ws/new_game', {
+    return await fetch('http://localhost:8080/hub/new_lobby', {
       method: 'POST',
       body: JSON.stringify({ id, name }),
     })
   }
 
-  public getGames = async () => {
-    const res = await fetch('http://localhost:8080/ws/get_games')
+  public getLobbyList = async () => {
+    const res = await fetch('http://localhost:8080/hub/lobbies')
     const games = await res.json()
     useLobbyStore.setState({ activeGames: games })
   }

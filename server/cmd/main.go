@@ -1,8 +1,8 @@
 package main
 
 import (
+	"go-kozel/internal/services"
 	router "go-kozel/internal/transport/http"
-	"go-kozel/internal/transport/ws"
 )
 
 // func startGame() {
@@ -17,32 +17,12 @@ import (
 
 func main() {
 
-	hub := ws.NewHub()
-	wsHandler := ws.NewHandler(hub)
-	go hub.Run()
+	// hub := ws.NewHub()
+	// wsHandler := ws.NewHandler(hub)
+	// go hub.Run()
 
-	router.InitRouter(wsHandler)
+	hub := services.NewHub()
+
+	router.InitRouter(hub)
 	router.Start(":8080")
-
-	// prompt := promptui.Select{
-	// 	Label: "Kozel game",
-	// 	Items: []string{"Start", "Exit"},
-	// }
-
-	// _, result, err := prompt.Run()
-
-	// if err != nil {
-	// 	fmt.Printf("Prompt failed %v\n", err)
-	// 	return
-	// }
-
-	// switch result {
-	// case "Start":
-	// 	startGame()
-	// case "Exit":
-	// 	exitGame()
-	// default:
-	// 	fmt.Println("Invalid choice. Exiting...")
-	// 	exitGame()
-	// }
 }
