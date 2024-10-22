@@ -1,14 +1,16 @@
+import { useAuthStore } from "../stores/auth.store"
 import { useLobbyStore } from "../stores/lobby.store"
-
-const MOCK_USER_ID = "dag87a5dg"
-const MOCK_USERNAME = 'hellfever'
 
 class LobbyService {
 
   public newGame = async () => {
+    const user = useAuthStore.getState().user
+    if (!user) return
+
+    const { id, name } = user;
     return await fetch('http://localhost:8080/ws/new_game', {
       method: 'POST',
-      body: JSON.stringify({ id: MOCK_USER_ID, name: MOCK_USERNAME }),
+      body: JSON.stringify({ id, name }),
     })
   }
 
