@@ -24,6 +24,10 @@ export const MainPage = () => {
       console.log("SSE new_lobby: ", data)
       addLobby(data)
     })
+
+    return () => {
+      es.close()
+    }
   }, [addLobby])
 
   const handleNewGame = async () => {
