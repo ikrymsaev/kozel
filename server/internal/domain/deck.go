@@ -1,6 +1,9 @@
 package domain
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type Deck struct {
 	Cards [32]Card
@@ -11,7 +14,8 @@ func NewDeck() Deck {
 	i := 0
 	for _, suit := range CARD_SUITS {
 		for _, cardType := range CARD_TYPES {
-			cards[i] = NewCard(cardType, suit)
+			uri := fmt.Sprintf("images/%d.jpg", i+1)
+			cards[i] = NewCard(cardType, suit, uri)
 			i++
 		}
 	}

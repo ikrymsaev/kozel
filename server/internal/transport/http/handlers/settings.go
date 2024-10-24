@@ -16,6 +16,7 @@ type DeckCardRes struct {
 	CardType domain.CardType `json:"suit"`
 	CardSuit domain.CardSuit `json:"type"`
 	IsTrump  bool            `json:"isTrump"`
+	ImageUri string          `json:"imageUri"`
 }
 
 func (h *SettingsHandler) GetDeck(c *gin.Context) {
@@ -26,6 +27,7 @@ func (h *SettingsHandler) GetDeck(c *gin.Context) {
 			CardType: card.CardType,
 			CardSuit: card.CardSuit,
 			IsTrump:  card.IsTrump,
+			ImageUri: card.ImageUri,
 		})
 	}
 

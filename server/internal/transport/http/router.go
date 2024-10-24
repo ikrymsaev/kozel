@@ -26,6 +26,7 @@ func InitRouter(hub *services.Hub) {
 		MaxAge: 12 * time.Hour,
 	}))
 
+	r.Static("/images", "../static/images")
 	hubHandlers := handlers.NewHubHandler(hub)
 	r.POST("/hub/new_lobby", hubHandlers.NewLobby)
 	r.GET("/hub/lobbies", hubHandlers.GetLobbies)

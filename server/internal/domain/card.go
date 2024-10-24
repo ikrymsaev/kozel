@@ -3,6 +3,7 @@ package domain
 import "fmt"
 
 type Card struct {
+	ImageUri string
 	CardType CardType
 	CardSuit CardSuit
 	IsUsed   bool
@@ -10,8 +11,9 @@ type Card struct {
 	Owner    *Player
 }
 
-func NewCard(cardType CardType, cardSuit CardSuit) Card {
+func NewCard(cardType CardType, cardSuit CardSuit, imageUri string) Card {
 	return Card{
+		ImageUri: imageUri,
 		CardType: cardType,
 		CardSuit: cardSuit,
 		IsUsed:   false,

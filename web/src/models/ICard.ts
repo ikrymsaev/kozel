@@ -1,5 +1,6 @@
 
 export interface ICard {
+  imageUri: string
   suit: ESuit
   type: ECardType
   isTrump: boolean
