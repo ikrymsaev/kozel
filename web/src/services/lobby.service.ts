@@ -33,7 +33,7 @@ class LobbyService {
       addLobby(data)
     })
 
-    return es.close
+    return () => es?.close()
   }
 }
 

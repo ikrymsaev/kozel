@@ -23,15 +23,15 @@ const (
 )
 
 type CardType struct {
-	Type  ECard
-	Name  string
-	Order byte
-	Score byte
+	Type  ECard  `json:"type"`
+	Name  string `json:"name"`
+	Order byte   `json:"order"`
+	Score byte   `json:"score"`
 }
 type CardSuit struct {
-	Suit  ESuit
-	Name  string
-	Order byte
+	Suit  ESuit  `json:"suit"`
+	Name  string `json:"name"`
+	Order byte   `json:"order"`
 }
 
 var CARD_TYPES = [8]CardType{

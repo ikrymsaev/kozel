@@ -26,11 +26,13 @@ func InitRouter(hub *services.Hub) {
 		MaxAge: 12 * time.Hour,
 	}))
 
-	hubHandlers := handlers.NewHandler(hub)
-
+	hubHandlers := handlers.NewHubHandler(hub)
 	r.POST("/hub/new_lobby", hubHandlers.NewLobby)
 	r.GET("/hub/lobbies", hubHandlers.GetLobbies)
 	r.GET("/hub/watch_lobbies", hubHandlers.WatchLobbies)
+
+	settingsHandlers := handlers.NewSettingsHandler()
+	r.GET("/settings/deck", settingsHandlers.GetDeck)
 }
 
 func Start(addr string) error {

@@ -1,19 +1,22 @@
 import { MainLayout } from "./layouts/MainLayout/MainLayout"
 import { useEffect } from "react"
-import { wsService } from "../services/ws.service"
-import { useAuthStore } from "../stores/auth.store"
+import { useSettingsStore } from "../stores/settings.store"
 
 export const LobbyPage = () => {
-  const user = useAuthStore((state) => state.user)
+  const fetchDeck = useSettingsStore((state) => state.fetchDeck)
+
+  useEffect(() => {
+    fetchDeck()
+  }, [fetchDeck])
 
   /**
    * Test connect to websocket chat
    */
-  useEffect(() => {
-    if (!user) return
-    const { id: userId, name: username } = user;
-    wsService.connect({ roomId: userId, userId, username })
-  }, [user])
+  // useEffect(() => {
+  //   if (!user) return
+  //   const { id: userId, name: username } = user;
+  //   wsService.connect({ roomId: userId, userId, username })
+  // }, [user])
 
   return (
     <MainLayout>

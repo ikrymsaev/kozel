@@ -7,12 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Handler struct {
+type HubHandler struct {
 	hub *services.Hub
 }
 
-func NewHandler(h *services.Hub) *Handler {
-	return &Handler{
+func NewHubHandler(h *services.Hub) *HubHandler {
+	return &HubHandler{
 		hub: h,
 	}
 }
@@ -27,7 +27,7 @@ type LobbyRes struct {
 	Name string `json:"name"`
 }
 
-func (h *Handler) NewLobby(c *gin.Context) {
+func (h *HubHandler) NewLobby(c *gin.Context) {
 	var req NewLobbyDto
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -47,7 +47,7 @@ func (h *Handler) NewLobby(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"lobbyId": lobby.Id})
 }
 
-func (h *Handler) GetLobbies(c *gin.Context) {
+func (h *HubHandler) GetLobbies(c *gin.Context) {
 	lobbies := make([]LobbyRes, 0)
 
 	for _, l := range h.hub.Lobbies {
@@ -60,7 +60,7 @@ func (h *Handler) GetLobbies(c *gin.Context) {
 	c.JSON(http.StatusOK, lobbies)
 }
 
-func (h *Handler) WatchLobbies(c *gin.Context) {
+func (h *HubHandler) WatchLobbies(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
 	c.Header("Connection", "keep-alive")

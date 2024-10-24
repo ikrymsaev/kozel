@@ -12,7 +12,9 @@ export const MainPage = () => {
 
   useEffect(() => {
     const unwatch = lobbyService.watchLobbies()
-    return unwatch
+    return () => {
+      unwatch()
+    }
   }, [])
 
   const handleNewGame = async () => {
@@ -25,7 +27,7 @@ export const MainPage = () => {
     }
   }
 
-  const enterGame = async (gameId: string) => {
+  const enterGame = (gameId: string) => {
     navigate('/lobby?id=' + gameId)
   }
 
@@ -34,9 +36,9 @@ export const MainPage = () => {
       <h1>Main Page</h1>
       <button disabled={creating} onClick={handleNewGame}>new game</button>
       <div>
-        {activeGames.map(game => (
-          <div key={game.id} onClick={() => enterGame(game.id)} style={{ cursor: 'pointer' }}>
-            {game.id} | {game.name}
+        {activeGames.map(lobby => (
+          <div key={lobby.id} onClick={() => enterGame(lobby.id)} style={{ cursor: 'pointer' }}>
+            {lobby.id} | {lobby.name}
           </div>
         ))}
       </div>
