@@ -5,7 +5,7 @@ WORKDIR /usr/local/src
 RUN apk --no-cache add bash git make gcc gettext musl-dev
 
 # dependencies
-COPY ["go.mod", "go.sum", "./"]
+COPY ["go.mod", "go.sum", "static", "./"]
 RUN go mod download
 
 COPY . .
