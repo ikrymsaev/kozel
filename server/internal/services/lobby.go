@@ -1,23 +1,49 @@
 package services
 
 import (
+	"fmt"
 	"go-kozel/internal/domain"
-
-	"github.com/google/uuid"
 )
 
 type Lobby struct {
 	Id      string
 	Name    string
-	OwnerId string
-	Players map[string]*domain.User
+	Lobby   *domain.Lobby
+	Clients map[*Client]bool
+	hub     *Hub
+	msgCh   chan string
 }
 
-func NewLobby(ownerId string, name string) *Lobby {
+func NewLobby(id string, name string, hub *Hub) *Lobby {
 	return &Lobby{
-		Id:      uuid.New().String(),
+		Id:      id,
 		Name:    name,
-		OwnerId: ownerId,
-		Players: make(map[string]*domain.User),
+		Lobby:   domain.NewLobby(id, name),
+		Clients: make(map[*Client]bool),
+		hub:     hub,
+		msgCh:   make(chan string, 10),
+	}
+}
+
+func (l *Lobby) AddClient(client *Client) {
+	l.Clients[client] = true
+	msg := fmt.Sprintf("%s joined:", client.User.Username)
+	l.msgCh <- msg
+}
+
+func (l *Lobby) RemoveClient(client *Client) {
+	delete(l.Clients, client)
+	msg := fmt.Sprintf("%s left:", client.User.Username)
+	l.msgCh <- msg
+}
+
+func (l *Lobby) Run() {
+	for {
+		select {
+		case msg := <-l.msgCh:
+			for client := range l.Clients {
+				client.MessageCh <- msg
+			}
+		}
 	}
 }

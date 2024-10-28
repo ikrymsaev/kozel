@@ -27,33 +27,13 @@ type LobbyRes struct {
 	Name string `json:"name"`
 }
 
-func (h *HubHandler) NewLobby(c *gin.Context) {
-	var req NewLobbyDto
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	hasLobby := h.hub.HasLobby(req.Id)
-	if hasLobby {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "lobby already exists"})
-		return
-	}
-
-	ownerId := req.Id
-	lobbyName := req.Name
-	lobby := services.NewLobby(ownerId, lobbyName)
-	h.hub.AddLobby(lobby)
-
-	c.JSON(http.StatusCreated, gin.H{"lobbyId": lobby.Id})
-}
-
 func (h *HubHandler) GetLobbies(c *gin.Context) {
 	lobbies := make([]LobbyRes, 0)
 
 	for _, l := range h.hub.Lobbies {
 		lobbies = append(lobbies, LobbyRes{
 			Id:   l.Id,
-			Name: l.Name,
+			Name: l.Lobby.Name,
 		})
 	}
 

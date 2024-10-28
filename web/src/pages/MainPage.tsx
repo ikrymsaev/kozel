@@ -20,7 +20,9 @@ export const MainPage = () => {
   const handleNewGame = async () => {
     try {
       setCreating(true);
-      await lobbyService.newGame();
+      const lobbyId = await lobbyService.newLobby();
+      if (!lobbyId) return
+      navigate('/lobby?id=' + lobbyId)
     }
     finally {
       setCreating(false);
