@@ -1,8 +1,8 @@
 package services
 
 import (
-	"fmt"
 	"go-kozel/internal/domain"
+	"go-kozel/internal/domain/events"
 )
 
 type Lobby struct {
@@ -11,7 +11,7 @@ type Lobby struct {
 	Lobby   *domain.Lobby
 	Clients map[*Client]bool
 	hub     *Hub
-	msgCh   chan string
+	msgCh   chan *events.LobbyEvent
 }
 
 func NewLobby(id string, name string, hub *Hub) *Lobby {
@@ -21,20 +21,20 @@ func NewLobby(id string, name string, hub *Hub) *Lobby {
 		Lobby:   domain.NewLobby(id, name),
 		Clients: make(map[*Client]bool),
 		hub:     hub,
-		msgCh:   make(chan string, 10),
+		msgCh:   make(chan *events.LobbyEvent, 10),
 	}
 }
 
 func (l *Lobby) AddClient(client *Client) {
 	l.Clients[client] = true
-	msg := fmt.Sprintf("%s joined:", client.User.Username)
-	l.msgCh <- msg
+	event := events.NewChatEvent("joined to lobby", client.User)
+	l.msgCh <- event
 }
 
 func (l *Lobby) RemoveClient(client *Client) {
 	delete(l.Clients, client)
-	msg := fmt.Sprintf("%s left:", client.User.Username)
-	l.msgCh <- msg
+	event := events.NewChatEvent("has left from lobby", client.User)
+	l.msgCh <- event
 }
 
 func (l *Lobby) Run() {
@@ -42,7 +42,7 @@ func (l *Lobby) Run() {
 		select {
 		case msg := <-l.msgCh:
 			for client := range l.Clients {
-				client.MessageCh <- msg
+				client.EventsCh <- msg
 			}
 		}
 	}
