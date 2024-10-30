@@ -1,9 +1,25 @@
 package services
 
+import "go-kozel/internal/domain"
+
+type EMessageType string
+
+const (
+	Connection EMessageType = "connection"
+	Chat       EMessageType = "chat"
+	Action     EMessageType = "action"
+	Update     EMessageType = "update"
+)
+
 type ChatMessage struct {
-	Message string `json:"message"`
+	Type     EMessageType `json:"type"`
+	Sender   domain.User  `json:"sender"`
+	IsSystem bool         `json:"isSystem"`
+	Message  string       `json:"message"`
 }
 
 type ConnectionMessage struct {
-	IsConnected bool `json:"isConnected"`
+	Type        EMessageType `json:"type"`
+	User        domain.User  `json:"user"`
+	IsConnected bool         `json:"isConnected"`
 }

@@ -1,3 +1,4 @@
+import { toast } from "react-toastify"
 import { ILobby } from "../models/ILobby"
 import { useAuthStore } from "../stores/auth.store"
 import { useChatStore } from "../stores/chat.store"
@@ -56,29 +57,38 @@ class LobbyService extends WS {
   }
 
   private onMessage = (e: { data: string }) => {
-    const chatStore = useChatStore.getState()
-    const me = useAuthStore.getState().user
     try {
       const m = JSON.parse(e.data) as TWsMessage
-      console.log(m)
-      if (isConnectionMsg(m)) {
-        const { sender, data: {isConnected} } = m
-        const username = !sender ? "unknown: " : sender.userId === me?.id ? "You" : `${sender.username}: `
-        const connMessage = `${username}${isConnected ? ' connected' : ' disconnected'}`
-        if (sender?.userId === me?.id && isConnected) {
-          chatStore.reset()
-        }
-        chatStore.addMessage(connMessage)
-      }
-      if (isChatMsg(m)) {
-        const { sender, data: {message} } = m
-        const username = !sender ? "unknown: " :  sender.userId === me?.id ? "" : `${sender.username}: `
-        const msg = `${username}${message}`
-        chatStore.addMessage(msg)
-      }
+      console.log("onMessage: ", m)
+      if (isConnectionMsg(m)) this.onConnectMessage(m)
+      else if (isChatMsg(m)) this.onChatMessage(m)
+      else console.error('Unknown message: ', m)
     } catch (e) {
       console.error('Failed to parse message: ', e)
     }
+  }
+
+  private onChatMessage = (m: TChatMsg) => {
+    const chatStore = useChatStore.getState()
+    const me = useAuthStore.getState().user
+    const { message, sender } = m
+    const isMe = sender?.id === me?.id
+    const username = !sender ? "unknown: " : isMe ? "" : `${sender.username}: `
+    const msg = `${username}${message}`
+    chatStore.addMessage(msg)
+  }
+
+  private onConnectMessage = (msg: TConnMsg) => {
+    const chatStore = useChatStore.getState()
+    const me = useAuthStore.getState().user
+    const { isConnected, user } = msg
+    const isMe = user?.id === me?.id
+    const username = !user ? "unknown: " : `${user.username}`
+    const connMessage = `${username}${isConnected ? ' joined to lobby' : ' left from lobby'}`
+    if (isMe && isConnected) {
+      chatStore.reset()
+    }
+    if (!isMe) toast(connMessage)
   }
 
   public getLobbyList = async () => {
@@ -105,21 +115,29 @@ class LobbyService extends WS {
 
 export const lobbyService = new LobbyService()
 
-interface ISender {
-  userId: string
+interface ILobbyUser {
+  id: string
   username: string
 }
 
 export enum EMsgType {
   Connection = "connection",
   Chat = "chat",
-  Action = "action"
+  Action = "action",
+  Update = "update",
 }
-export type TWsBaseMsg<T> = { type: EMsgType, sender?: ISender,  data: T }
+export type TWsBaseMsg = { type: EMsgType}
 export type TWsMessage = TConnMsg | TChatMsg
 
-export type TConnMsg = TWsBaseMsg<{ isConnected: boolean }>
+export type TConnMsg = TWsBaseMsg & {
+  isConnected: boolean
+  user: ILobbyUser
+}
 const isConnectionMsg = (message: TWsMessage): message is TConnMsg => message.type === EMsgType.Connection
 
-export type TChatMsg = TWsBaseMsg<{ message: string }>
+export type TChatMsg = TWsBaseMsg & {
+  sender: ILobbyUser
+  message: string
+  isSystem: boolean
+}
 const isChatMsg = (message: TWsMessage): message is TChatMsg => message.type === EMsgType.Chat

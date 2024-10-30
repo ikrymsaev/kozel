@@ -11,38 +11,35 @@ import (
 )
 
 type Client struct {
-	Conn     *websocket.Conn
-	Lobby    *Lobby
-	User     *domain.User
-	EventsCh chan *events.LobbyEvent
+	Conn          *websocket.Conn
+	Lobby         *Lobby
+	User          *domain.User
+	chatCh        chan *events.ChatEvent
+	connectionsCh chan *events.ConnectionEvent
 }
 
 func NewClient(lobby *Lobby, user *domain.User, conn *websocket.Conn) *Client {
 	return &Client{
-		Conn:     conn,
-		Lobby:    lobby,
-		User:     user,
-		EventsCh: make(chan *events.LobbyEvent, 10),
+		Conn:          conn,
+		Lobby:         lobby,
+		User:          user,
+		chatCh:        make(chan *events.ChatEvent, 1),
+		connectionsCh: make(chan *events.ConnectionEvent, 1),
 	}
 }
 
+// Отправляем сообщения клиенту
 func (c *Client) WriteMessage() {
 	defer func() {
 		c.Conn.Close()
 	}()
 
 	for {
-		event, ok := <-c.EventsCh
-		if !ok {
-			return
-		}
-		switch event.Type {
-		case events.Connection:
+		select {
+		case event := <-c.chatCh:
+			c.Conn.WriteJSON(c.getChatMsg(event))
+		case event := <-c.connectionsCh:
 			c.Conn.WriteJSON(c.getConnMsg(event))
-		case events.Chat:
-			msg := c.getChatMsg(event)
-			fmt.Printf("client msg: %v\n", msg)
-			c.Conn.WriteJSON(msg)
 		}
 	}
 }
@@ -73,34 +70,34 @@ func (c *Client) ReadMessage() {
 			message := data["message"].(string)
 			fmt.Printf("new message: %s\n", message)
 			fmt.Printf("c.User: %v\n", c.User)
-			event := events.LobbyEvent{
-				Type:      events.Chat,
-				Sender:    events.Sender{UserId: c.User.ID, Username: c.User.Username},
-				ChatEvent: events.ChatEvent{Message: message},
+			event := events.ChatEvent{
+				Type:    events.Chat,
+				Message: message,
+				Sender:  *c.User,
 			}
-			c.Lobby.eventsCh <- &event
+			c.Lobby.chatCh <- &event
 		}
 	}
 }
 
 type WsMessage struct {
-	Type   events.ELobbyEvent `json:"type"`
-	Sender events.Sender      `json:"sender"`
-	Data   any                `json:"data"`
+	Type events.ELobbyEvent `json:"type"`
+	Data any                `json:"data"`
 }
 
-func (c *Client) getChatMsg(event *events.LobbyEvent) WsMessage {
+func (c *Client) getChatMsg(event *events.ChatEvent) ChatMessage {
 	fmt.Printf("getChatMsg: %v\n", event)
-	return WsMessage{
-		Type:   events.Chat,
-		Sender: event.Sender,
-		Data:   ChatMessage{Message: event.Message},
+	return ChatMessage{
+		Type:    Chat,
+		Message: event.Message,
+		Sender:  event.Sender,
 	}
 }
-func (c *Client) getConnMsg(event *events.LobbyEvent) WsMessage {
-	return WsMessage{
-		Type:   events.Connection,
-		Sender: event.Sender,
-		Data:   ConnectionMessage{IsConnected: event.IsConnected},
+func (c *Client) getConnMsg(event *events.ConnectionEvent) ConnectionMessage {
+	fmt.Printf("getConnMsg: %v\n", event)
+	return ConnectionMessage{
+		Type:        Connection,
+		IsConnected: event.IsConnected,
+		User:        event.User,
 	}
 }

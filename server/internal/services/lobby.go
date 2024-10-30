@@ -7,52 +7,57 @@ import (
 )
 
 type Lobby struct {
-	Id       string
-	Name     string
-	Lobby    *domain.Lobby
-	Clients  map[*Client]bool
-	hub      *Hub
-	eventsCh chan *events.LobbyEvent
+	Id            string
+	Name          string
+	Lobby         *domain.Lobby
+	Clients       map[*Client]bool
+	hub           *Hub
+	chatCh        chan *events.ChatEvent
+	connectionsCh chan *events.ConnectionEvent
 }
 
 func NewLobby(id string, name string, hub *Hub) *Lobby {
 	return &Lobby{
-		Id:       id,
-		Name:     name,
-		Lobby:    domain.NewLobby(id, name),
-		Clients:  make(map[*Client]bool),
-		hub:      hub,
-		eventsCh: make(chan *events.LobbyEvent, 10),
+		Id:            id,
+		Name:          name,
+		Lobby:         domain.NewLobby(id, name),
+		Clients:       make(map[*Client]bool),
+		hub:           hub,
+		chatCh:        make(chan *events.ChatEvent, 1),
+		connectionsCh: make(chan *events.ConnectionEvent, 10),
 	}
 }
 
 func (l *Lobby) AddClient(client *Client) {
 	l.Clients[client] = true
-	event := events.LobbyEvent{
-		Type:            events.Connection,
-		Sender:          events.Sender{UserId: client.User.ID, Username: client.User.Username},
-		ConnectionEvent: events.ConnectionEvent{IsConnected: true},
+	event := events.ConnectionEvent{
+		IsConnected: true,
+		User:        domain.User{ID: client.User.ID, Username: client.User.Username},
 	}
-	l.eventsCh <- &event
+	l.connectionsCh <- &event
 }
 
 func (l *Lobby) RemoveClient(client *Client) {
 	delete(l.Clients, client)
-	event := events.LobbyEvent{
-		Type:            events.Connection,
-		Sender:          events.Sender{UserId: client.User.ID, Username: client.User.Username},
-		ConnectionEvent: events.ConnectionEvent{IsConnected: false},
+	event := events.ConnectionEvent{
+		IsConnected: false,
+		User:        domain.User{ID: client.User.ID, Username: client.User.Username},
 	}
-	l.eventsCh <- &event
+	l.connectionsCh <- &event
 }
 
 func (l *Lobby) Run() {
 	for {
 		select {
-		case event := <-l.eventsCh:
-			fmt.Printf("event: %v\n", event)
+		case event := <-l.connectionsCh:
+			fmt.Printf("Lobby connectionsCh: %v\n", event)
 			for client := range l.Clients {
-				client.EventsCh <- event
+				client.connectionsCh <- event
+			}
+		case event := <-l.chatCh:
+			fmt.Printf("Lobby chatCh: %v\n", event)
+			for client := range l.Clients {
+				client.chatCh <- event
 			}
 		}
 	}

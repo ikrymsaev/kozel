@@ -1,28 +1,25 @@
 package events
 
+import "go-kozel/internal/domain"
+
 type ELobbyEvent string
 
 const (
-	Chat       ELobbyEvent = "chat"
 	Connection ELobbyEvent = "connection"
+	Chat       ELobbyEvent = "chat"
 	Action     ELobbyEvent = "action"
+	Update     ELobbyEvent = "update"
 )
 
-type LobbyEvent struct {
-	Type   ELobbyEvent
-	Sender Sender
-	ChatEvent
-	ConnectionEvent
-}
-
-type Sender struct {
-	UserId   string `json:"userId"`
-	Username string `json:"username"`
-}
-
 type ChatEvent struct {
-	Message string
+	Type     ELobbyEvent
+	IsSystem bool
+	Message  string
+	Sender   domain.User
 }
+
 type ConnectionEvent struct {
+	Type        ELobbyEvent
 	IsConnected bool
+	User        domain.User
 }
