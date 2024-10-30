@@ -23,3 +23,8 @@ type ConnectionEvent struct {
 	IsConnected bool
 	User        domain.User
 }
+
+type UpdateEvent struct {
+	Type  ELobbyEvent
+	Slots [4]domain.Slot
+}

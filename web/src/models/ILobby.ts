@@ -5,3 +5,8 @@ export interface ILobby {
   name: string
   players: IPlayer[]
 }
+
+export interface ILobbySlot {
+  order: number
+  player?: IPlayer
+}

@@ -6,10 +6,10 @@ const getMockUser = (): IPlayer => {
   const mocked = localStorage.getItem('gk_user')
   if (mocked) return JSON.parse(mocked) as IPlayer
 
-  const user = { id: 'i423ub6234iu6b', name: 'John Doe' }
+  const user = { id: 'i423ub6234iu6b', username: 'John Doe' }
   localStorage.setItem('gk_user', JSON.stringify(user))
 
-  return { id: 'i423ub6234iu6b', name: 'John Doe' }
+  return { id: 'i423ub6234iu6b', username: 'John Doe' }
 }
 
 interface State {

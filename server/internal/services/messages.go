@@ -23,3 +23,8 @@ type ConnectionMessage struct {
 	User        domain.User  `json:"user"`
 	IsConnected bool         `json:"isConnected"`
 }
+
+type UpdateMessage struct {
+	Type  EMessageType   `json:"type"`
+	Slots [4]domain.Slot `json:"slots"`
+}

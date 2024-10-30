@@ -1,5 +1,5 @@
 import { toast } from "react-toastify"
-import { ILobby } from "../models/ILobby"
+import { ILobby, ILobbySlot } from "../models/ILobby"
 import { useAuthStore } from "../stores/auth.store"
 import { useChatStore } from "../stores/chat.store"
 import { useLobbyStore } from "../stores/lobby.store"
@@ -12,10 +12,10 @@ class LobbyService extends WS {
     const user = useAuthStore.getState().user
     if (!user) return
 
-    const { id, name } = user;
+    const { id, username } = user;
     let url = "http://localhost:8080/lobby/new"
     url += "?user_id=" + id;
-    url += "&username=" + name;
+    url += "&username=" + username;
     try {
       const res = await fetch(url)
       const lobbyId = await res.json()
@@ -31,7 +31,7 @@ class LobbyService extends WS {
     if (!user) return
     let url = "ws://localhost:8080/lobby/join/" + lobbyId
     url += "?user_id=" + user.id
-    url += "&username=" + user.name
+    url += "&username=" + user.username
     try {
       this.conn(url)
       this.withConn((conn) => (conn.onmessage = this.onMessage))
@@ -62,10 +62,18 @@ class LobbyService extends WS {
       console.log("onMessage: ", m)
       if (isConnectionMsg(m)) this.onConnectMessage(m)
       else if (isChatMsg(m)) this.onChatMessage(m)
+      else if (isUpdateMsg(m)) this.onUpdateMessage(m)
       else console.error('Unknown message: ', m)
     } catch (e) {
       console.error('Failed to parse message: ', e)
     }
+  }
+
+  private onUpdateMessage = (m: TUpdateMsg) => {
+    console.log({ m })
+    const lobbyStore = useLobbyStore.getState()
+    const { slots } = m
+    lobbyStore.updateSlots(slots)
   }
 
   private onChatMessage = (m: TChatMsg) => {
@@ -115,7 +123,7 @@ class LobbyService extends WS {
 
 export const lobbyService = new LobbyService()
 
-interface ILobbyUser {
+export interface ILobbyUser {
   id: string
   username: string
 }
@@ -127,7 +135,7 @@ export enum EMsgType {
   Update = "update",
 }
 export type TWsBaseMsg = { type: EMsgType}
-export type TWsMessage = TConnMsg | TChatMsg
+export type TWsMessage = TConnMsg | TChatMsg | TUpdateMsg
 
 export type TConnMsg = TWsBaseMsg & {
   isConnected: boolean
@@ -141,3 +149,8 @@ export type TChatMsg = TWsBaseMsg & {
   isSystem: boolean
 }
 const isChatMsg = (message: TWsMessage): message is TChatMsg => message.type === EMsgType.Chat
+
+export type TUpdateMsg = TWsBaseMsg & {
+  slots: ILobbySlot[]
+}
+const isUpdateMsg = (message: TWsMessage): message is TUpdateMsg => message.type === EMsgType.Update
