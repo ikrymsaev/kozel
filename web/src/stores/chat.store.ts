@@ -7,6 +7,7 @@ interface State {
 }
 interface Actions {
   addMessage: (msg: string) => void
+  reset: () => void
 }
 type TChatStore = State & Actions;
 
@@ -19,4 +20,7 @@ export const useChatStore = create<TChatStore>()(immer((set) => ({
       state.messages.push(msg)
     })
   },
+  reset: () => set((state) => {
+    state.messages = [];
+  })
 })))

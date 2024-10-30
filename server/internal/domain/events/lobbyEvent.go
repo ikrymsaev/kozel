@@ -1,7 +1,5 @@
 package events
 
-import "go-kozel/internal/domain"
-
 type ELobbyEvent string
 
 const (
@@ -11,30 +9,20 @@ const (
 )
 
 type LobbyEvent struct {
-	Name ELobbyEvent `json:"type"`
+	Type   ELobbyEvent
+	Sender Sender
 	ChatEvent
+	ConnectionEvent
+}
+
+type Sender struct {
+	UserId   string `json:"userId"`
+	Username string `json:"username"`
 }
 
 type ChatEvent struct {
-	Sender  *domain.User `json:"sender"`
-	Message string       `json:"message"`
+	Message string
 }
-
-func NewChatEvent(message string, sender *domain.User) *LobbyEvent {
-	return &LobbyEvent{
-		Name: Chat,
-		ChatEvent: ChatEvent{
-			Message: message,
-			Sender:  sender,
-		},
-	}
-}
-
-func NewLobbyEvent(message string) *LobbyEvent {
-	return &LobbyEvent{
-		Name: Chat,
-		ChatEvent: ChatEvent{
-			Message: message,
-		},
-	}
+type ConnectionEvent struct {
+	IsConnected bool
 }

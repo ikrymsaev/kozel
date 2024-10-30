@@ -1,5 +1,5 @@
 import { MainLayout } from "./layouts/MainLayout/MainLayout"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useSettingsStore } from "../stores/settings.store"
 import { useSearchParams } from "react-router-dom"
 import { lobbyService } from "../services/lobby.service"
@@ -11,6 +11,8 @@ export const LobbyPage = () => {
 
   const fetchDeck = useSettingsStore((state) => state.fetchDeck)
   const messages = useChatStore((state) => state.messages)
+
+  const [input, setInput] = useState("")
 
   useEffect(() => {
     fetchDeck()
@@ -26,6 +28,25 @@ export const LobbyPage = () => {
   return (
     <MainLayout>
       <h1>Lobby Page</h1>
+      <div>
+        <form onSubmit={(e) => e.preventDefault()}>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <button
+            type="submit"
+            onClick={(e) => {
+              e.preventDefault()
+              lobbyService.sendChatMessage(input)
+              setInput("")
+            }}
+          >
+            {">"}
+          </button>
+        </form>
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '10px' }}>
         {messages.map((msg, i) => <p key={i}>{msg}</p>)}
       </div>

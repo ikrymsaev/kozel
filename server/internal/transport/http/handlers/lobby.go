@@ -69,7 +69,7 @@ func (h *LobbyHandler) JoinLobby(c *gin.Context) {
 	fmt.Printf("User %s\n", userId)
 
 	user := &domain.User{ID: userId, Username: username}
-	client := services.NewClient(lobbyHub.Lobby, user, conn)
+	client := services.NewClient(lobbyHub, user, conn)
 	lobbyHub.AddClient(client)
 
 	defer func() {
