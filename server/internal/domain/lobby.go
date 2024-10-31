@@ -27,6 +27,12 @@ func NewLobby(ownerId string, name string) *Lobby {
 	}
 }
 
+func (l *Lobby) MoveSlot(from int, to int) {
+	SlotPlayer := l.Slots[from-1].Player
+	l.Slots[from-1].Player = l.Slots[to-1].Player
+	l.Slots[to-1].Player = SlotPlayer
+}
+
 func (l *Lobby) GetSlots() [4]Slot {
 	return l.Slots
 }

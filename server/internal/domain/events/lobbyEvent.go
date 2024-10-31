@@ -7,7 +7,7 @@ type ELobbyEvent string
 const (
 	Connection ELobbyEvent = "connection"
 	Chat       ELobbyEvent = "chat"
-	Action     ELobbyEvent = "action"
+	MoveSlot   ELobbyEvent = "move_slot_action"
 	Update     ELobbyEvent = "update"
 )
 

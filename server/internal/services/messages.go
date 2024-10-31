@@ -7,9 +7,13 @@ type EMessageType string
 const (
 	Connection EMessageType = "connection"
 	Chat       EMessageType = "chat"
-	Action     EMessageType = "action"
+	MoveSlot   EMessageType = "move_slot_action"
 	Update     EMessageType = "update"
 )
+
+type WsMessage struct {
+	Type EMessageType `json:"type"`
+}
 
 type ChatMessage struct {
 	Type     EMessageType `json:"type"`
@@ -27,4 +31,14 @@ type ConnectionMessage struct {
 type UpdateMessage struct {
 	Type  EMessageType   `json:"type"`
 	Slots [4]domain.Slot `json:"slots"`
+}
+
+type ActionMessage struct {
+	Type   EMessageType `json:"type"`
+	Action string       `json:"action"`
+}
+type MoveSlotMessage struct {
+	Type EMessageType `json:"type"`
+	From int          `json:"from"`
+	To   int          `json:"to"`
 }

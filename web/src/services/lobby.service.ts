@@ -41,8 +41,19 @@ class LobbyService extends WS {
     }
   }
 
+  /** Leave a lobby */
   public leaveLobby = () => {
     this.disconn()
+  }
+
+  public moveSlot = (from: number, to: number) => {
+    this.withConn((conn) => conn.send(
+      JSON.stringify({
+        type: EMsgType.MoveSlot,
+        from,
+        to
+      })
+    ))
   }
 
   public sendChatMessage = (message: string) => {
@@ -131,8 +142,8 @@ export interface ILobbyUser {
 export enum EMsgType {
   Connection = "connection",
   Chat = "chat",
-  Action = "action",
   Update = "update",
+  MoveSlot = "move_slot_action",
 }
 export type TWsBaseMsg = { type: EMsgType}
 export type TWsMessage = TConnMsg | TChatMsg | TUpdateMsg

@@ -55,7 +55,7 @@ func (c *Client) ReadMessage() {
 	}()
 
 	for {
-		_, event, err := c.Conn.ReadMessage()
+		_, recievedMessage, err := c.Conn.ReadMessage()
 
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
@@ -63,30 +63,49 @@ func (c *Client) ReadMessage() {
 			}
 			break
 		}
-		var wsMessage = map[string]interface{}{}
-		marshalErr := json.Unmarshal(event, &wsMessage)
+		var wsMessage = WsMessage{}
+		marshalErr := json.Unmarshal(recievedMessage, &wsMessage)
 		if marshalErr != nil {
 			log.Printf("error: %v", err)
 			break
 		}
-		if wsMessage["type"] == string(events.Chat) {
-			data := wsMessage["data"].(map[string]interface{})
-			message := data["message"].(string)
-			fmt.Printf("new message: %s\n", message)
-			fmt.Printf("c.User: %v\n", c.User)
-			event := events.ChatEvent{
-				Type:    events.Chat,
-				Message: message,
-				Sender:  *c.User,
-			}
-			c.Lobby.chatCh <- &event
+		if string(wsMessage.Type) == string(events.Chat) {
+			c.parseChatMessage(recievedMessage)
+		}
+		if string(wsMessage.Type) == string(events.MoveSlot) {
+			c.parseMoveSlotMessage(recievedMessage)
 		}
 	}
 }
 
-type WsMessage struct {
-	Type events.ELobbyEvent `json:"type"`
-	Data any                `json:"data"`
+func (c *Client) parseMoveSlotMessage(recievedMessage []byte) {
+	var wsMessage = MoveSlotMessage{}
+	marshalErr := json.Unmarshal(recievedMessage, &wsMessage)
+	if marshalErr != nil {
+		log.Printf("error: %v", marshalErr)
+		return
+	}
+
+	c.Lobby.MoveSlot(c, wsMessage.From, wsMessage.To)
+}
+
+func (c *Client) parseChatMessage(recievedMessage []byte) {
+	var wsMessage = map[string]interface{}{}
+	marshalErr := json.Unmarshal(recievedMessage, &wsMessage)
+	if marshalErr != nil {
+		log.Printf("error: %v", marshalErr)
+		return
+	}
+	data := wsMessage["data"].(map[string]interface{})
+	message := data["message"].(string)
+	fmt.Printf("new message: %s\n", message)
+	fmt.Printf("c.User: %v\n", c.User)
+	event := events.ChatEvent{
+		Type:    events.Chat,
+		Message: message,
+		Sender:  *c.User,
+	}
+	c.Lobby.chatCh <- &event
 }
 
 func (c *Client) getChatMsg(event *events.ChatEvent) ChatMessage {

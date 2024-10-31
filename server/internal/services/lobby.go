@@ -58,6 +58,15 @@ func (l *Lobby) RemoveClient(client *Client) {
 	l.sendUpdates()
 }
 
+func (l *Lobby) MoveSlot(client *Client, from int, to int) {
+	if client.User.ID != l.Lobby.OwnerId {
+		fmt.Println("Only owner can move slot")
+		return
+	}
+	l.Lobby.MoveSlot(from, to)
+	l.sendUpdates()
+}
+
 func (l *Lobby) sendUpdates() {
 	event := events.UpdateEvent{
 		Type:  events.Update,
