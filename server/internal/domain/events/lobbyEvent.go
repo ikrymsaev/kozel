@@ -9,7 +9,13 @@ const (
 	Chat       ELobbyEvent = "chat"
 	MoveSlot   ELobbyEvent = "move_slot_action"
 	Update     ELobbyEvent = "update"
+	Error      ELobbyEvent = "error"
 )
+
+type ErrorEvent struct {
+	Type  ELobbyEvent
+	Error string
+}
 
 type ChatEvent struct {
 	Type     ELobbyEvent

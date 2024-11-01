@@ -19,7 +19,9 @@ export const useLobbyStore = create<TLobbyStore>()(immer((set) => ({
   activeGames: [],
   slots: [],
   /** Actions */
-  setActiveGames: (activeGames: ILobby[]) => {set({ activeGames })},
+  setActiveGames: (activeGames: ILobby[]) => {
+    set({ activeGames })
+  },
   addLobby: (game: ILobby) => set((state) => {
     state.activeGames.unshift(game)
   }),

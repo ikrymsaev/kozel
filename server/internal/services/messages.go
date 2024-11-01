@@ -9,10 +9,16 @@ const (
 	Chat       EMessageType = "chat"
 	MoveSlot   EMessageType = "move_slot_action"
 	Update     EMessageType = "update"
+	Error      EMessageType = "error"
 )
 
 type WsMessage struct {
 	Type EMessageType `json:"type"`
+}
+
+type ErrorMessage struct {
+	Type  EMessageType `json:"type"`
+	Error string       `json:"error"`
 }
 
 type ChatMessage struct {

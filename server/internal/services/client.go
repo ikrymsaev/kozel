@@ -17,6 +17,7 @@ type Client struct {
 	chatCh        chan *events.ChatEvent
 	connectionsCh chan *events.ConnectionEvent
 	updateCh      chan *events.UpdateEvent
+	errorCh       chan *events.ErrorEvent
 }
 
 func NewClient(lobby *Lobby, user *domain.User, conn *websocket.Conn) *Client {
@@ -27,6 +28,7 @@ func NewClient(lobby *Lobby, user *domain.User, conn *websocket.Conn) *Client {
 		chatCh:        make(chan *events.ChatEvent, 1),
 		connectionsCh: make(chan *events.ConnectionEvent, 1),
 		updateCh:      make(chan *events.UpdateEvent, 1),
+		errorCh:       make(chan *events.ErrorEvent, 1),
 	}
 }
 
@@ -44,6 +46,8 @@ func (c *Client) WriteMessage() {
 			c.Conn.WriteJSON(c.getConnMsg(event))
 		case event := <-c.updateCh:
 			c.Conn.WriteJSON(c.getUpdateMsg(event))
+		case event := <-c.errorCh:
+			c.Conn.WriteJSON(c.getErrorMsg(event))
 		}
 	}
 }
@@ -129,5 +133,12 @@ func (c *Client) getUpdateMsg(event *events.UpdateEvent) UpdateMessage {
 	return UpdateMessage{
 		Type:  Update,
 		Slots: event.Slots,
+	}
+}
+func (c *Client) getErrorMsg(event *events.ErrorEvent) ErrorMessage {
+	fmt.Printf("getErrorMsg: %v\n", event)
+	return ErrorMessage{
+		Type:  Error,
+		Error: event.Error,
 	}
 }
