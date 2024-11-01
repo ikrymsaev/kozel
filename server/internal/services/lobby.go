@@ -30,10 +30,9 @@ func NewLobby(id string, name string, hub *Hub) *Lobby {
 	}
 }
 
-func (l *Lobby) AddClient(client *Client) {
+func (l *Lobby) AddClient(client *Client) error {
 	if err := l.Lobby.ConnectPlayer(client.User); err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	l.Clients[client] = true
 	event := events.ConnectionEvent{
@@ -42,6 +41,8 @@ func (l *Lobby) AddClient(client *Client) {
 	}
 	l.connectionsCh <- &event
 	l.sendUpdates()
+
+	return nil
 }
 
 func (l *Lobby) RemoveClient(client *Client) {

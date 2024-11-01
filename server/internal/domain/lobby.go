@@ -39,6 +39,13 @@ func (l *Lobby) GetSlots() [4]Slot {
 
 // Подключение игрока к лобби
 func (l *Lobby) ConnectPlayer(user *User) error {
+	// Если игрок уже в лобби, то ничего не делаем
+	for _, slot := range l.Slots {
+		if slot.Player != nil && slot.Player.ID == user.ID {
+			return fmt.Errorf("player already in lobby")
+		}
+	}
+
 	// Поиск свободного слота
 	for index, slot := range l.Slots {
 		if slot.Player == nil {

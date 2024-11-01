@@ -29,7 +29,13 @@ export const LobbyPage = () => {
       <h1>Lobby Page</h1>
       <LobbyChat />
       <LobbySlots />
-      <Button size="m" color="gold" onClick={lobbyService.startGame} >Start Game</Button>
+      <div className="flex w-full justify-center py-4">
+        <Button size="m" color="gold"
+          onClick={lobbyService.startGame}
+        >
+          Start Game
+        </Button>
+      </div>
     </MainLayout>
   )
 }

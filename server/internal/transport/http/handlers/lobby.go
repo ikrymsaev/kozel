@@ -70,7 +70,11 @@ func (h *LobbyHandler) JoinLobby(c *gin.Context) {
 
 	user := &domain.User{ID: userId, Username: username}
 	client := services.NewClient(lobbyHub, user, conn)
-	lobbyHub.AddClient(client)
+
+	if err := lobbyHub.AddClient(client); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	defer func() {
 		lobbyHub.RemoveClient(client)
