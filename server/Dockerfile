@@ -16,4 +16,4 @@ FROM alpine as runner
 # run
 COPY --from=builder /bin/main /bin/main
 
-CMD ["/bin/main"]
+CMD ["/bin/main", "serve", "--http=0.0.0.0:8090"]
