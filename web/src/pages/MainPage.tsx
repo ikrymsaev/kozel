@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { lobbyService } from "../services/lobby.service";
 import { useLobbyStore } from "../stores/lobby.store";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/shared/ui-kit/Button";
+import { Text } from "@/shared/ui-kit/Text";
+import { MainLayout } from "./layouts/MainLayout/MainLayout";
 
 export const MainPage = () => {
   const navigate = useNavigate()
@@ -34,16 +37,26 @@ export const MainPage = () => {
   }
 
   return (
-    <div>
-      <h1>Main Page</h1>
-      <button disabled={creating} onClick={handleNewGame}>new game</button>
-      <div>
-        {activeGames.map(lobby => (
-          <div key={lobby.id} onClick={() => enterGame(lobby.id)} style={{ cursor: 'pointer' }}>
-            {lobby.id} | {lobby.name}
-          </div>
-        ))}
+    <MainLayout>
+      <div className="flex flex-col items-center gap-4 w-full overflow-hidden">
+        <Text type="header" className="font-semibold">Main Page</Text>
+        <Button size="m" disabled={creating} onClick={handleNewGame}>
+          NEW GAME
+        </Button>
+        <div className="flex flex-col gap-1 w-full">
+          {activeGames.map(lobby => (
+            <div
+              key={lobby.id}
+              onClick={() => enterGame(lobby.id)} style={{ cursor: 'pointer' }}
+              className="text-sky-700 px-4 py-2 rounded-md bg-slate-300 hover:bg-slate-400"
+            >
+              <Text>
+                {lobby.name}
+              </Text>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </MainLayout>
   )
 }

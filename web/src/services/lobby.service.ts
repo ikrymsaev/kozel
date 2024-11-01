@@ -56,6 +56,10 @@ class LobbyService extends WS {
     ))
   }
 
+  public startGame = () => {
+    console.log('start game')
+  }
+
   public sendChatMessage = (message: string) => {
     const user = useAuthStore.getState().user
     if (!user) return
