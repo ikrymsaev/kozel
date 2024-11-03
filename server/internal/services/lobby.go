@@ -51,6 +51,10 @@ func (l *Lobby) RemoveClient(client *Client) {
 	if err := l.Lobby.DisconnectPlayer(client.User); err != nil {
 		fmt.Println(err)
 	}
+	if len(l.Clients) == 0 {
+		l.hub.RemoveLobby(l.Id)
+		return
+	}
 	event := events.ConnectionEvent{
 		IsConnected: false,
 		User:        domain.User{ID: client.User.ID, Username: client.User.Username},

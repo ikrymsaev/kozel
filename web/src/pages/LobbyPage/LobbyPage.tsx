@@ -6,6 +6,7 @@ import { lobbyService } from "../../services/lobby.service"
 import { LobbySlots } from "./components/LobbySlots"
 import { LobbyChat } from "./components/LobbyChat"
 import { Button } from "@/shared/ui-kit/Button"
+import { gameService } from "@/services/game.service"
 
 export const LobbyPage = () => {
   const [searchParams] = useSearchParams();
@@ -17,7 +18,7 @@ export const LobbyPage = () => {
     fetchDeck()
   }, [fetchDeck])
 
-  /** Connect to websocket chat */
+  /** Connect to websocket */
   useEffect(() => {
     if (!lobbyId) return
     lobbyService.joinLobby(lobbyId)
@@ -30,7 +31,7 @@ export const LobbyPage = () => {
       <LobbySlots />
       <div className="flex w-full justify-center py-4">
         <Button size="m" color="gold"
-          onClick={lobbyService.startGame}
+          onClick={gameService.startGame}
         >
           Start Game
         </Button>

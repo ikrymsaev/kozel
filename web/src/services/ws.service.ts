@@ -1,4 +1,4 @@
-import { TWSAction, TWsBaseAction } from "./actions"
+import { TWSAction } from "./actions"
 import { EWSMessage, isWsMsg, TConnectionMsg, TMsgMap, TNewMessageMsg, TUpdateSlotsMsg, TWsMessage } from "./messages"
 import { WS } from "./ws"
 
@@ -27,7 +27,7 @@ class WSService extends WS {
     super.disconn()
   }
 
-  public send = <T extends TWSAction>(data: T & TWsBaseAction) => {
+  public send = <T extends TWSAction>(data: T) => {
     this.withConn((conn) => conn.send(JSON.stringify(data)))
   }
 

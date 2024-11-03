@@ -24,13 +24,19 @@ class LobbyService {
   public watchLobbies = () => {
     this.getLobbyList()
 
-    const { addLobby } = useLobbyStore.getState()
+    const { addLobby,  } = useLobbyStore.getState()
     const es = new EventSource('http://localhost:8080/hub/watch_lobbies')
     console.log("SSE opened, watching for lobbies...")
     es.addEventListener('new_lobby', (event) => {
       const data = JSON.parse(event.data) as ILobby
       console.log("SSE new_lobby: ", data)
       addLobby(data)
+    })
+
+    es.addEventListener('remove_lobby', (event) => {
+      const lobbyId = event.data
+      console.log("SSE remove_lobby: ", lobbyId)
+      useLobbyStore.getState().removeLobby(lobbyId)
     })
 
     return () => es?.close()
@@ -75,10 +81,6 @@ class LobbyService {
 
   public moveSlot = (from: number, to: number) => {
     this.ws.send({ type: EWSAction.MoveSlot, from, to })
-  }
-
-  public startGame = () => {
-    console.log('start game')
   }
 
   private onUpdateSlots = (m: TUpdateSlotsMsg) => {

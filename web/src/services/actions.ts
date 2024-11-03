@@ -5,25 +5,24 @@
 export enum EWSAction {
   SendMessage,
   MoveSlot,
+  StartGame
 }
 
 export type TWsBaseAction = { type: EWSAction }
 
 /** Отправить сообщение в чат */
-export type TSendMessage = {
+export type TSendMessage = TWsBaseAction & {
   message: string
 }
 /** Переместить слот */
-export type TMoveSlot = {
+export type TMoveSlot = TWsBaseAction & {
   from: number,
   to: number
 }
+/** Начать игру */
+export type TStartGame = TWsBaseAction
 
 export type TWSAction =
   | TSendMessage
   | TMoveSlot
-
-export type TActionsMap = {
-  [EWSAction.SendMessage]: TSendMessage
-  [EWSAction.MoveSlot]: TMoveSlot
-}
+  | TStartGame
