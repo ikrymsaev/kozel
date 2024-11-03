@@ -1,12 +1,13 @@
+import { IChatMessage } from "@/models/IChatMessage";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
 
 interface State {
-  messages: string[]
+  messages: IChatMessage[]
 }
 interface Actions {
-  addMessage: (msg: string) => void
+  addMessage: (msg: IChatMessage) => void
   reset: () => void
 }
 type TChatStore = State & Actions;
@@ -15,7 +16,7 @@ export const useChatStore = create<TChatStore>()(immer((set) => ({
   /** State */
   messages: [],
   /** Actions */
-  addMessage: (msg: string) => {
+  addMessage: (msg: IChatMessage) => {
     set((state) => {
       state.messages.push(msg)
     })

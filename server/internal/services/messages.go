@@ -2,49 +2,39 @@ package services
 
 import "go-kozel/internal/domain"
 
-type EMessageType string
+// @Messages send to the client
+type EWSMessage int
 
 const (
-	Connection EMessageType = "connection"
-	Chat       EMessageType = "chat"
-	MoveSlot   EMessageType = "move_slot_action"
-	Update     EMessageType = "update"
-	Error      EMessageType = "error"
+	Error       EWSMessage = iota
+	Connection  EWSMessage = iota
+	NewMessage  EWSMessage = iota
+	UpdateSlots EWSMessage = iota
 )
 
 type WsMessage struct {
-	Type EMessageType `json:"type"`
+	Type EWSMessage `json:"type"`
 }
 
 type ErrorMessage struct {
-	Type  EMessageType `json:"type"`
-	Error string       `json:"error"`
+	Type  EWSMessage `json:"type"`
+	Error string     `json:"error"`
 }
 
-type ChatMessage struct {
-	Type     EMessageType `json:"type"`
-	Sender   domain.User  `json:"sender"`
-	IsSystem bool         `json:"isSystem"`
-	Message  string       `json:"message"`
+type ChatNewMessage struct {
+	Type     EWSMessage  `json:"type"`
+	Sender   domain.User `json:"sender"`
+	Message  string      `json:"message"`
+	IsSystem bool        `json:"isSystem"`
 }
 
 type ConnectionMessage struct {
-	Type        EMessageType `json:"type"`
-	User        domain.User  `json:"user"`
-	IsConnected bool         `json:"isConnected"`
+	Type        EWSMessage  `json:"type"`
+	IsConnected bool        `json:"isConnected"`
+	User        domain.User `json:"user"`
 }
 
-type UpdateMessage struct {
-	Type  EMessageType   `json:"type"`
+type UpdateSlotsMessage struct {
+	Type  EWSMessage     `json:"type"`
 	Slots [4]domain.Slot `json:"slots"`
-}
-
-type ActionMessage struct {
-	Type   EMessageType `json:"type"`
-	Action string       `json:"action"`
-}
-type MoveSlotMessage struct {
-	Type EMessageType `json:"type"`
-	From int          `json:"from"`
-	To   int          `json:"to"`
 }

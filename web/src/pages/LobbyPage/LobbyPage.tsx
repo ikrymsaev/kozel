@@ -27,7 +27,6 @@ export const LobbyPage = () => {
   return (
     <MainLayout>
       <h1>Lobby Page</h1>
-      <LobbyChat />
       <LobbySlots />
       <div className="flex w-full justify-center py-4">
         <Button size="m" color="gold"
@@ -36,6 +35,7 @@ export const LobbyPage = () => {
           Start Game
         </Button>
       </div>
+      <LobbyChat />
     </MainLayout>
   )
 }

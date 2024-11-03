@@ -59,7 +59,7 @@ func (l *Lobby) ConnectPlayer(user *User) error {
 // Отключение игрока от лобби
 func (l *Lobby) DisconnectPlayer(user *User) error {
 	for index, slot := range l.Slots {
-		if slot.Player.ID == user.ID {
+		if slot.Player != nil && slot.Player.ID == user.ID {
 			l.Slots[index].Player = nil
 			return nil
 		}

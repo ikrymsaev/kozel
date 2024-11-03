@@ -67,23 +67,23 @@ func (c *Client) ReadMessage() {
 			}
 			break
 		}
-		var wsMessage = WsMessage{}
+		var wsMessage = WsAction{}
 		marshalErr := json.Unmarshal(recievedMessage, &wsMessage)
 		if marshalErr != nil {
 			log.Printf("error: %v", err)
 			break
 		}
-		if string(wsMessage.Type) == string(events.Chat) {
-			c.parseChatMessage(recievedMessage)
+		if wsMessage.Type == SendMessage {
+			c.parseSendMsgAction(recievedMessage)
 		}
-		if string(wsMessage.Type) == string(events.MoveSlot) {
-			c.parseMoveSlotMessage(recievedMessage)
+		if wsMessage.Type == MoveSlot {
+			c.parseMoveSlotAction(recievedMessage)
 		}
 	}
 }
 
-func (c *Client) parseMoveSlotMessage(recievedMessage []byte) {
-	var wsMessage = MoveSlotMessage{}
+func (c *Client) parseMoveSlotAction(recievedMessage []byte) {
+	var wsMessage = MoveSlotAction{}
 	marshalErr := json.Unmarshal(recievedMessage, &wsMessage)
 	if marshalErr != nil {
 		log.Printf("error: %v", marshalErr)
@@ -93,15 +93,14 @@ func (c *Client) parseMoveSlotMessage(recievedMessage []byte) {
 	c.Lobby.MoveSlot(c, wsMessage.From, wsMessage.To)
 }
 
-func (c *Client) parseChatMessage(recievedMessage []byte) {
+func (c *Client) parseSendMsgAction(recievedMessage []byte) {
 	var wsMessage = map[string]interface{}{}
 	marshalErr := json.Unmarshal(recievedMessage, &wsMessage)
 	if marshalErr != nil {
 		log.Printf("error: %v", marshalErr)
 		return
 	}
-	data := wsMessage["data"].(map[string]interface{})
-	message := data["message"].(string)
+	message := wsMessage["message"].(string)
 	fmt.Printf("new message: %s\n", message)
 	fmt.Printf("c.User: %v\n", c.User)
 	event := events.ChatEvent{
@@ -112,10 +111,10 @@ func (c *Client) parseChatMessage(recievedMessage []byte) {
 	c.Lobby.chatCh <- &event
 }
 
-func (c *Client) getChatMsg(event *events.ChatEvent) ChatMessage {
+func (c *Client) getChatMsg(event *events.ChatEvent) ChatNewMessage {
 	fmt.Printf("getChatMsg: %v\n", event)
-	return ChatMessage{
-		Type:    Chat,
+	return ChatNewMessage{
+		Type:    NewMessage,
 		Message: event.Message,
 		Sender:  event.Sender,
 	}
@@ -128,10 +127,10 @@ func (c *Client) getConnMsg(event *events.ConnectionEvent) ConnectionMessage {
 		User:        event.User,
 	}
 }
-func (c *Client) getUpdateMsg(event *events.UpdateEvent) UpdateMessage {
+func (c *Client) getUpdateMsg(event *events.UpdateEvent) UpdateSlotsMessage {
 	fmt.Printf("getUpdateMsg: %v\n", event)
-	return UpdateMessage{
-		Type:  Update,
+	return UpdateSlotsMessage{
+		Type:  UpdateSlots,
 		Slots: event.Slots,
 	}
 }

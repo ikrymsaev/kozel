@@ -1,11 +1,40 @@
 import { toast } from "react-toastify"
-import { ILobby, ILobbySlot } from "../models/ILobby"
+import { ILobby } from "../models/ILobby"
 import { useAuthStore } from "../stores/auth.store"
 import { useChatStore } from "../stores/chat.store"
 import { useLobbyStore } from "../stores/lobby.store"
-import { WS } from "./ws"
+import { EWSAction } from "./actions"
+import { TWsService, wsService } from "./ws.service"
+import { EWSMessage, TConnectionMsg, TUpdateSlotsMsg } from "./messages"
 
-class LobbyService extends WS {
+class LobbyService {
+  private readonly ws: TWsService
+  constructor() {
+    this.ws = wsService
+    this.ws.listen(EWSMessage.Connection, this.onConnect)
+    this.ws.listen(EWSMessage.UpdateSlots, this.onUpdateSlots)
+  }
+
+  public getLobbyList = async () => {
+    const res = await fetch('http://localhost:8080/hub/lobbies')
+    const games = await res.json()
+    useLobbyStore.setState({ activeGames: games })
+  }
+
+  public watchLobbies = () => {
+    this.getLobbyList()
+
+    const { addLobby } = useLobbyStore.getState()
+    const es = new EventSource('http://localhost:8080/hub/watch_lobbies')
+    console.log("SSE opened, watching for lobbies...")
+    es.addEventListener('new_lobby', (event) => {
+      const data = JSON.parse(event.data) as ILobby
+      console.log("SSE new_lobby: ", data)
+      addLobby(data)
+    })
+
+    return () => es?.close()
+  }
 
   /** Create a new lobby */
   public newLobby = async () => {
@@ -33,9 +62,7 @@ class LobbyService extends WS {
     url += "?user_id=" + user.id
     url += "&username=" + user.username
     try {
-      this.conn(url)
-      this.withConn((conn) => (conn.onmessage = this.onMessage))
-      return 
+      return this.ws.connect(url)
     } catch (e) {
       console.error('Failed to join lobby: ', e)
     }
@@ -43,65 +70,25 @@ class LobbyService extends WS {
 
   /** Leave a lobby */
   public leaveLobby = () => {
-    this.disconn()
+    this.ws.disconnect()
   }
 
   public moveSlot = (from: number, to: number) => {
-    this.withConn((conn) => conn.send(
-      JSON.stringify({
-        type: EMsgType.MoveSlot,
-        from,
-        to
-      })
-    ))
+    this.ws.send({ type: EWSAction.MoveSlot, from, to })
   }
 
   public startGame = () => {
     console.log('start game')
   }
 
-  public sendChatMessage = (message: string) => {
-    const user = useAuthStore.getState().user
-    if (!user) return
-    this.withConn((conn) => conn.send(
-      JSON.stringify({
-        type: EMsgType.Chat,
-        data: { message }
-      })
-    ))
-  }
-
-  private onMessage = (e: { data: string }) => {
-    try {
-      const m = JSON.parse(e.data) as TWsMessage
-      console.log("onMessage: ", m)
-      if (isConnectionMsg(m)) this.onConnectMessage(m)
-      else if (isChatMsg(m)) this.onChatMessage(m)
-      else if (isUpdateMsg(m)) this.onUpdateMessage(m)
-      else console.error('Unknown message: ', m)
-    } catch (e) {
-      console.error('Failed to parse message: ', e)
-    }
-  }
-
-  private onUpdateMessage = (m: TUpdateMsg) => {
+  private onUpdateSlots = (m: TUpdateSlotsMsg) => {
     console.log({ m })
     const lobbyStore = useLobbyStore.getState()
     const { slots } = m
     lobbyStore.updateSlots(slots)
   }
 
-  private onChatMessage = (m: TChatMsg) => {
-    const chatStore = useChatStore.getState()
-    const me = useAuthStore.getState().user
-    const { message, sender } = m
-    const isMe = sender?.id === me?.id
-    const username = !sender ? "unknown: " : isMe ? "" : `${sender.username}: `
-    const msg = `${username}${message}`
-    chatStore.addMessage(msg)
-  }
-
-  private onConnectMessage = (msg: TConnMsg) => {
+  private onConnect = (msg: TConnectionMsg) => {
     const chatStore = useChatStore.getState()
     const me = useAuthStore.getState().user
     const { isConnected, user } = msg
@@ -113,59 +100,6 @@ class LobbyService extends WS {
     }
     if (!isMe) toast(connMessage)
   }
-
-  public getLobbyList = async () => {
-    const res = await fetch('http://localhost:8080/hub/lobbies')
-    const games = await res.json()
-    useLobbyStore.setState({ activeGames: games })
-  }
-
-  public watchLobbies = () => {
-    this.getLobbyList()
-
-    const { addLobby } = useLobbyStore.getState()
-    const es = new EventSource('http://localhost:8080/hub/watch_lobbies')
-    console.log("SSE opened, watching for lobbies...")
-    es.addEventListener('new_lobby', (event) => {
-      const data = JSON.parse(event.data) as ILobby
-      console.log("SSE new_lobby: ", data)
-      addLobby(data)
-    })
-
-    return () => es?.close()
-  }
 }
 
 export const lobbyService = new LobbyService()
-
-export interface ILobbyUser {
-  id: string
-  username: string
-}
-
-export enum EMsgType {
-  Connection = "connection",
-  Chat = "chat",
-  Update = "update",
-  MoveSlot = "move_slot_action",
-}
-export type TWsBaseMsg = { type: EMsgType}
-export type TWsMessage = TConnMsg | TChatMsg | TUpdateMsg
-
-export type TConnMsg = TWsBaseMsg & {
-  isConnected: boolean
-  user: ILobbyUser
-}
-const isConnectionMsg = (message: TWsMessage): message is TConnMsg => message.type === EMsgType.Connection
-
-export type TChatMsg = TWsBaseMsg & {
-  sender: ILobbyUser
-  message: string
-  isSystem: boolean
-}
-const isChatMsg = (message: TWsMessage): message is TChatMsg => message.type === EMsgType.Chat
-
-export type TUpdateMsg = TWsBaseMsg & {
-  slots: ILobbySlot[]
-}
-const isUpdateMsg = (message: TWsMessage): message is TUpdateMsg => message.type === EMsgType.Update
