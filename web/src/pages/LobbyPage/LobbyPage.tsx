@@ -17,6 +17,7 @@ export const LobbyPage = () => {
 
   const fetchDeck = useSettingsStore((state) => state.fetchDeck)
   const game = useGameStore((state) => state.game)
+  const resetGame = useGameStore((state) => state.reset)
 
   useEffect(() => {
     fetchDeck()
@@ -26,8 +27,11 @@ export const LobbyPage = () => {
   useEffect(() => {
     if (!lobbyId) return
     lobbyService.joinLobby(lobbyId)
-    return lobbyService.leaveLobby
-  }, [lobbyId])
+    return () => {
+      lobbyService.leaveLobby()
+      resetGame()
+    }
+  }, [lobbyId, resetGame])
   
 
   const PageContent = () => {
@@ -76,8 +80,9 @@ const Game = () => {
                     key={`${card.suit}${card.type}`}
                     className={cn(
                       (card.suit === ESuit.Booby || card.suit === ESuit.Chervy) ? "text-stopRed" : "text-black",
-                      "inline-flex justify-center text-sm px-1 py-3 min-w-8 rounded-md border-[1px] border-slate-900 cursor-default hover:scale-105",
-                      card.isTrump ?  "bg-yellow-200" : "bg-white",
+                      "min-h-12 min-w-8",
+                      "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default hover:scale-105",
+                      card.isHidden ? "bg-hint" : card.isTrump ?  "bg-yellow-200" : "bg-white",
                     )}
                   >
                     {card.type}{card.suit}

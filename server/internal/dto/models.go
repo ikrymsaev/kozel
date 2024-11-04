@@ -83,6 +83,7 @@ func GetPlayerStateModel(player *domain.Player) PlayerStateModel {
 
 // Модель карты
 type CardStateModel struct {
+	IsHidden bool   `json:"isHidden"`
 	ImageUri string `json:"imageUri"`
 	CardType string `json:"type"`
 	CardSuit string `json:"suit"`

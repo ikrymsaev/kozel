@@ -1,5 +1,6 @@
 
 export interface ICard {
+  isHidden: boolean
   imageUri: string
   suit: ESuit
   type: ECardType

@@ -149,8 +149,20 @@ func (c *Client) getErrorMsg(event *dto.ErrorEvent) dto.ErrorMessage {
 	}
 }
 func (c *Client) getGameStateMsg(event *dto.GameStateEvent) dto.GameStateMessage {
+	gameModel := dto.NewGameStateModel(&event.Game)
+
+	for index, player := range gameModel.Players {
+		if player.User == nil || player.User.ID != c.User.ID {
+			hiddenHand := []dto.CardStateModel{}
+			for range player.Hand {
+				hiddenHand = append(hiddenHand, dto.CardStateModel{IsHidden: true})
+			}
+			gameModel.Players[index].Hand = hiddenHand
+		}
+	}
+
 	return dto.GameStateMessage{
 		Type: dto.GameState,
-		Game: dto.NewGameStateModel(&event.Game),
+		Game: gameModel,
 	}
 }
