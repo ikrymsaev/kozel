@@ -42,6 +42,12 @@ func (l *LobbyService) AddClient(client *ClientService) error {
 	}
 	l.connectionsCh <- &event
 	l.sendUpdates()
+	if l.GameService != nil {
+		client.gameStateCh <- &dto.GameStateEvent{
+			Type: dto.EventGameState,
+			Game: l.GameService.Game,
+		}
+	}
 
 	return nil
 }
