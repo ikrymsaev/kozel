@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-kozel/internal/domain"
 	"go-kozel/internal/dto"
+	"time"
 )
 
 type GameService struct {
@@ -20,7 +21,7 @@ func NewGameService(lobby *LobbyService) GameService {
 	}
 }
 
-func (g *GameService) PraiseTrump(cl *ClientService, trump domain.ESuit) {
+func (g *GameService) PraiseTrump(cl *ClientService, trump *domain.ESuit) {
 	round := &g.Game.CurrentRound
 
 	praiserId := round.Praiser.Id
@@ -38,12 +39,17 @@ func (g *GameService) PraiseTrump(cl *ClientService, trump domain.ESuit) {
 		}
 		return
 	}
-	round.SetTrump(&trump)
+	g.setTrump(trump)
+}
+
+func (g *GameService) setTrump(trump *domain.ESuit) {
+	round := &g.Game.CurrentRound
+	round.SetTrump(trump)
 	g.Game.SetStage(domain.StagePlayerStep)
 	for client := range g.LobbyService.Clients {
 		client.trumpCh <- &dto.NewTrumpEvent{
 			Type:  dto.EventNewTrump,
-			Trump: trump,
+			Trump: *trump,
 		}
 		client.stageCh <- &dto.StageChangeEvent{
 			Type:  dto.EventStageChange,
@@ -54,8 +60,8 @@ func (g *GameService) PraiseTrump(cl *ClientService, trump domain.ESuit) {
 
 func (g *GameService) Run() {
 	g.Game.Start()
-
-	fmt.Printf("Current Round FirstStepPlayer %v\n", g.Game.CurrentRound.FirstStepPlayer)
+	round := &g.Game.CurrentRound
+	fmt.Printf("Current Round FirstStepPlayer %v\n", round.FirstStepPlayer)
 	fmt.Println("Game created")
 
 	for client := range g.LobbyService.Clients {
@@ -64,4 +70,12 @@ func (g *GameService) Run() {
 			Game: g.Game,
 		}
 	}
+
+	if round.Praiser.User == nil {
+		fmt.Printf("Bot praising trump \n")
+		time.Sleep(3 * time.Second)
+		trump := round.Praiser.PraiseTrump()
+		g.setTrump(trump)
+	}
+
 }

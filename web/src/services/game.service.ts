@@ -3,6 +3,7 @@ import { EWSAction } from "../api/ws/ws.actions"
 import { EWSMessage, TNewTrumpMsg, TStageMsg, TUpdateGameStateMsg } from "../api/ws/ws.messages"
 import { TWsService, wsService } from "../api/ws/ws.service"
 import { ESuit } from "@/models/ICard"
+import { toast } from "react-toastify"
 
 class GameService {
   private readonly ws: TWsService
@@ -24,6 +25,7 @@ class GameService {
   private onNewTrump = (msg: TNewTrumpMsg) => {
     const gameStore = useGameStore.getState()
     gameStore.setTrump(msg.trump)
+    toast(`Козырь : ${msg.trump}`)
   }
 
   private onUpdateGameState = (msg: TUpdateGameStateMsg) => {

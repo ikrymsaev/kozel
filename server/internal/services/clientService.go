@@ -111,7 +111,7 @@ func (c *ClientService) parsePraiseTrumpAction(recievedMessage []byte) {
 		log.Printf("error: %v", marshalErr)
 		return
 	}
-	c.LobbyService.GameService.PraiseTrump(c, wsMessage.Trump)
+	c.LobbyService.GameService.PraiseTrump(c, &wsMessage.Trump)
 }
 
 func (c *ClientService) parseMoveSlotAction(recievedMessage []byte) {
