@@ -47,7 +47,7 @@ export const LobbyChat = () => {
             <span
               className={cn(
                 "text-white",
-                isMineMessage(msg) ? "text-right" : "text-left"
+                isMineMessage(msg) && "font-bold"
               )}>
               {msg.message}
             </span>
