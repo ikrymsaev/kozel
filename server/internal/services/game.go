@@ -28,7 +28,7 @@ func (g *GameService) Run() {
 
 	for client := range g.Lobby.Clients {
 		client.gameStateCh <- &dto.GameStateEvent{
-			Type: dto.EGameStateEvent,
+			Type: dto.EventGameState,
 			Game: g.Game,
 		}
 	}

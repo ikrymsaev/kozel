@@ -6,11 +6,11 @@ import "go-kozel/internal/domain"
 type EWSMessage int
 
 const (
-	Error       EWSMessage = iota
-	Connection  EWSMessage = iota
-	NewMessage  EWSMessage = iota
-	UpdateSlots EWSMessage = iota
-	GameState   EWSMessage = iota
+	WSMessageError       EWSMessage = iota
+	WSMessageConnection  EWSMessage = iota
+	WSMessageNewMessage  EWSMessage = iota
+	WSMessageUpdateSlots EWSMessage = iota
+	WSMessageGameState   EWSMessage = iota
 )
 
 type WsMessage struct {

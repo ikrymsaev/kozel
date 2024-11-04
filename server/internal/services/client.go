@@ -78,11 +78,11 @@ func (c *Client) ReadMessage() {
 			break
 		}
 		switch wsMessage.Type {
-		case dto.ESendMessage:
+		case dto.WSActionSendMessage:
 			c.parseSendMsgAction(recievedMessage)
-		case dto.EMoveSlot:
+		case dto.WSActionMoveSlot:
 			c.parseMoveSlotAction(recievedMessage)
-		case dto.EStartGame:
+		case dto.WSActionStartGame:
 			c.parseStartGameAction()
 		default:
 			fmt.Printf("unknown action: %v\n", wsMessage.Type)
@@ -114,7 +114,7 @@ func (c *Client) parseSendMsgAction(recievedMessage []byte) {
 	}
 	message := wsMessage["message"].(string)
 	event := dto.ChatEvent{
-		Type:    dto.EChatEvent,
+		Type:    dto.EventChat,
 		Message: message,
 		Sender:  *c.User,
 	}
@@ -123,7 +123,7 @@ func (c *Client) parseSendMsgAction(recievedMessage []byte) {
 
 func (c *Client) getChatMsg(event *dto.ChatEvent) dto.ChatNewMessage {
 	return dto.ChatNewMessage{
-		Type:    dto.NewMessage,
+		Type:    dto.WSMessageNewMessage,
 		Message: event.Message,
 		Sender:  event.Sender,
 	}
@@ -131,20 +131,20 @@ func (c *Client) getChatMsg(event *dto.ChatEvent) dto.ChatNewMessage {
 func (c *Client) getConnMsg(event *dto.ConnectionEvent) dto.ConnectionMessage {
 	fmt.Printf("getConnMsg: %v\n", event)
 	return dto.ConnectionMessage{
-		Type:        dto.Connection,
+		Type:        dto.WSMessageConnection,
 		IsConnected: event.IsConnected,
 		User:        event.User,
 	}
 }
 func (c *Client) getUpdateMsg(event *dto.UpdateEvent) dto.UpdateSlotsMessage {
 	return dto.UpdateSlotsMessage{
-		Type:  dto.UpdateSlots,
+		Type:  dto.WSMessageUpdateSlots,
 		Slots: event.Slots,
 	}
 }
 func (c *Client) getErrorMsg(event *dto.ErrorEvent) dto.ErrorMessage {
 	return dto.ErrorMessage{
-		Type:  dto.Error,
+		Type:  dto.WSMessageError,
 		Error: event.Error,
 	}
 }
@@ -162,7 +162,7 @@ func (c *Client) getGameStateMsg(event *dto.GameStateEvent) dto.GameStateMessage
 	}
 
 	return dto.GameStateMessage{
-		Type: dto.GameState,
+		Type: dto.WSMessageGameState,
 		Game: gameModel,
 	}
 }

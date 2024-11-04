@@ -4,9 +4,9 @@ package dto
 type EWSAction int
 
 const (
-	ESendMessage EWSAction = iota
-	EMoveSlot    EWSAction = iota
-	EStartGame   EWSAction = iota
+	WSActionSendMessage EWSAction = iota
+	WSActionMoveSlot    EWSAction = iota
+	WSActionStartGame   EWSAction = iota
 )
 
 type WsAction struct {

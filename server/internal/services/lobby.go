@@ -77,14 +77,14 @@ func (l *LobbyService) MoveSlot(client *Client, from int, to int) {
 func (l *LobbyService) StartGame(cl *Client) {
 	if l.GameService != nil {
 		cl.errorCh <- &dto.ErrorEvent{
-			Type:  dto.EErrorEvent,
+			Type:  dto.EventError,
 			Error: "Game already started",
 		}
 		return
 	}
 	if cl.User.ID != l.Lobby.OwnerId {
 		cl.errorCh <- &dto.ErrorEvent{
-			Type:  dto.EErrorEvent,
+			Type:  dto.EventError,
 			Error: "Only owner can start game",
 		}
 		return
@@ -96,7 +96,7 @@ func (l *LobbyService) StartGame(cl *Client) {
 
 func (l *LobbyService) sendUpdates() {
 	event := dto.UpdateEvent{
-		Type:  dto.EUpdateEvent,
+		Type:  dto.EventUpdate,
 		Slots: l.Lobby.GetSlots(),
 	}
 

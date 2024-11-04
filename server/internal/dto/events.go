@@ -5,12 +5,12 @@ import "go-kozel/internal/domain"
 type ELobbyEvent int
 
 const (
-	EConnectionEvent ELobbyEvent = iota
-	EChatEvent       ELobbyEvent = iota
-	EMoveSlotEvent   ELobbyEvent = iota
-	EUpdateEvent     ELobbyEvent = iota
-	EErrorEvent      ELobbyEvent = iota
-	EGameStateEvent  ELobbyEvent = iota
+	EventConnection ELobbyEvent = iota
+	EventChat       ELobbyEvent = iota
+	EventMoveSlot   ELobbyEvent = iota
+	EventUpdate     ELobbyEvent = iota
+	EventError      ELobbyEvent = iota
+	EventGameState  ELobbyEvent = iota
 )
 
 type ErrorEvent struct {
