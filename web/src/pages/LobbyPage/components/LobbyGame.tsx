@@ -16,7 +16,7 @@ export const LobbyGame = () => {
       <div className="flex flex-col w-full py-4">
         <GameStage />
         <div className="flex flex-col">
-          {game?.round.trump && <Text>Козырь: {game.round.trump}</Text>}
+          {game?.round.trump && <Text>Козырь: <Text type="header">{game.round.trump}</Text></Text>}
           {game?.round.firstStepPlayerId && <Text>Ходит: {getPlayerName(game?.round.firstStepPlayerId)}</Text>}
           {game?.round.praiserId && <Text>Хвалит: {getPlayerName(game?.round.praiserId)}</Text>}
         </div>

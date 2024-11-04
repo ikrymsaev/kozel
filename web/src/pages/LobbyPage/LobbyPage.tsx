@@ -9,6 +9,7 @@ import { Button } from "@/shared/ui-kit/Button"
 import { gameService } from "@/services/game.service"
 import { useGameStore } from "@/stores/game.store"
 import { LobbyGame } from "./components/LobbyGame"
+import { useAuthStore } from "@/stores/auth.store"
 
 export const LobbyPage = () => {
   const [searchParams] = useSearchParams();
@@ -17,6 +18,9 @@ export const LobbyPage = () => {
   const fetchDeck = useSettingsStore((state) => state.fetchDeck)
   const game = useGameStore((state) => state.game)
   const resetGame = useGameStore((state) => state.reset)
+
+  const user = useAuthStore((state) => state.user)
+  const isOwner = user?.id === lobbyId
 
   useEffect(() => {
     fetchDeck()
@@ -39,13 +43,15 @@ export const LobbyPage = () => {
     return (
       <div className="flex flex-col flex-grow">
         <LobbySlots />
-        <div className="flex w-full justify-center py-4">
-          <Button size="m" color="gold"
-            onClick={gameService.startGame}
-          >
-            Start Game
-          </Button>
-        </div>
+        {isOwner && (
+          <div className="flex w-full justify-center py-4">
+            <Button size="m" color="gold"
+              onClick={gameService.startGame}
+            >
+              Start Game
+            </Button>
+          </div>
+        )}
       </div>
     )
   }
