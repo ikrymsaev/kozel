@@ -11,7 +11,7 @@ type LobbyService struct {
 	Name          string
 	Lobby         *domain.Lobby
 	GameService   *GameService
-	Clients       map[*Client]bool
+	Clients       map[*ClientService]bool
 	hub           *Hub
 	chatCh        chan *dto.ChatEvent
 	connectionsCh chan *dto.ConnectionEvent
@@ -23,7 +23,7 @@ func NewLobbyService(id string, name string, hub *Hub) *LobbyService {
 		Id:            id,
 		Name:          name,
 		Lobby:         domain.NewLobby(id, name),
-		Clients:       make(map[*Client]bool),
+		Clients:       make(map[*ClientService]bool),
 		hub:           hub,
 		chatCh:        make(chan *dto.ChatEvent, 1),
 		connectionsCh: make(chan *dto.ConnectionEvent, 1),
@@ -31,7 +31,7 @@ func NewLobbyService(id string, name string, hub *Hub) *LobbyService {
 	}
 }
 
-func (l *LobbyService) AddClient(client *Client) error {
+func (l *LobbyService) AddClient(client *ClientService) error {
 	if err := l.Lobby.ConnectPlayer(client.User); err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (l *LobbyService) AddClient(client *Client) error {
 	return nil
 }
 
-func (l *LobbyService) RemoveClient(client *Client) {
+func (l *LobbyService) RemoveClient(client *ClientService) {
 	delete(l.Clients, client)
 
 	if err := l.Lobby.DisconnectPlayer(client.User); err != nil {
@@ -64,7 +64,7 @@ func (l *LobbyService) RemoveClient(client *Client) {
 	l.sendUpdates()
 }
 
-func (l *LobbyService) MoveSlot(client *Client, from int, to int) {
+func (l *LobbyService) MoveSlot(client *ClientService, from int, to int) {
 	if client.User.ID != l.Lobby.OwnerId {
 		fmt.Println("Only owner can move slot")
 		return
@@ -74,7 +74,7 @@ func (l *LobbyService) MoveSlot(client *Client, from int, to int) {
 }
 
 // Старт игры
-func (l *LobbyService) StartGame(cl *Client) {
+func (l *LobbyService) StartGame(cl *ClientService) {
 	if l.GameService != nil {
 		cl.errorCh <- &dto.ErrorEvent{
 			Type:  dto.EventError,

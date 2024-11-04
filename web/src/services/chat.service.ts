@@ -1,8 +1,8 @@
 import { useChatStore } from "@/stores/chat.store"
-import { EWSMessage, TNewMessageMsg } from "./messages"
-import { TWsService, wsService } from "./ws.service"
+import { EWSMessage, TNewMessageMsg } from "../api/ws/ws.messages"
+import { TWsService, wsService } from "../api/ws/ws.service"
 import { useAuthStore } from "@/stores/auth.store"
-import { EWSAction, TSendMessage } from "./actions"
+import { EWSAction, TSendMessage } from "../api/ws/ws.actions"
 
 class ChatService {
   private readonly ws: TWsService

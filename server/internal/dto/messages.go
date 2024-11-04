@@ -11,6 +11,8 @@ const (
 	WSMessageNewMessage  EWSMessage = iota
 	WSMessageUpdateSlots EWSMessage = iota
 	WSMessageGameState   EWSMessage = iota
+	WSMessageStage       EWSMessage = iota
+	WSMEssageNewTrump    EWSMessage = iota
 )
 
 type WsMessage struct {
@@ -43,4 +45,14 @@ type UpdateSlotsMessage struct {
 type GameStateMessage struct {
 	Type EWSMessage     `json:"type"`
 	Game GameStateModel `json:"game"`
+}
+
+type StageMessage struct {
+	Type  EWSMessage    `json:"type"`
+	Stage domain.EStage `json:"stage"`
+}
+
+type NewTrumpMessage struct {
+	Type  EWSMessage   `json:"type"`
+	Trump domain.ESuit `json:"trump"`
 }

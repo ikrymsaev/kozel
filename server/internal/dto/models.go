@@ -9,6 +9,7 @@ type GameStateModel struct {
 	Players [4]PlayerStateModel `json:"players"`
 	Round   RoundStateModel     `json:"round"`
 	Score   [2]byte             `json:"score"`
+	Stage   domain.EStage       `json:"stage"`
 }
 
 // Модель раунда
@@ -115,5 +116,6 @@ func NewGameStateModel(game *domain.Game) GameStateModel {
 		Players: players,
 		Round:   GetRoundStateModel(game.CurrentRound),
 		Score:   game.Score,
+		Stage:   game.Stage,
 	}
 }

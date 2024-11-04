@@ -1,5 +1,5 @@
-import { TWSAction } from "./actions"
-import { EWSMessage, isWsMsg, TConnectionMsg, TErrorMsg, TMsgMap, TNewMessageMsg, TUpdateGameStateMsg, TUpdateSlotsMsg, TWsMessage } from "./messages"
+import { TWSAction } from "./ws.actions"
+import { EWSMessage, isWsMsg, TConnectionMsg, TErrorMsg, TMsgMap, TNewMessageMsg, TNewTrumpMsg, TStageMsg, TUpdateGameStateMsg, TUpdateSlotsMsg, TWsMessage } from "./ws.messages"
 import { WS } from "./ws"
 
 type Listeners = {
@@ -16,7 +16,9 @@ class WSService extends WS {
     [EWSMessage.NewMessage]: new Set(),
     [EWSMessage.UpdateSlots]: new Set(),
     [EWSMessage.Error]: new Set(),
-    [EWSMessage.UpdateGameState]: new Set()
+    [EWSMessage.UpdateGameState]: new Set(),
+    [EWSMessage.Stage]: new Set(),
+    [EWSMessage.NewTrump]: new Set()
   }
 
   public connect(params: string) {
@@ -56,6 +58,12 @@ class WSService extends WS {
       /** Обновилось состояние игры */
       if (isWsMsg<TUpdateGameStateMsg>(message, EWSMessage.UpdateGameState))
         return this.listeners[EWSMessage.UpdateGameState].forEach((cb) => cb(message))
+      /** Стадия игры изменилась */
+      if (isWsMsg<TStageMsg>(message, EWSMessage.Stage))
+        return this.listeners[EWSMessage.Stage].forEach((cb) => cb(message))
+      /** Новый козырь */
+      if (isWsMsg<TNewTrumpMsg>(message, EWSMessage.NewTrump))
+        return this.listeners[EWSMessage.NewTrump].forEach((cb) => cb(message))
       console.error('Unknown message: ', message)
     } catch (e) {
       console.error('Failed to parse message: ', e)

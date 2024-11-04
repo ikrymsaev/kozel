@@ -34,7 +34,13 @@ func (r *Round) Init() {
 	r.dealCards()
 	firstPlayer := r.getFirstStepPlayer()
 	r.FirstStepPlayer = firstPlayer
+	r.Game.Stage = StagePraising
 	fmt.Printf("Init() firstPlayer: %v\n\n", r.FirstStepPlayer)
+}
+
+func (r *Round) SetTrump(trump *ESuit) {
+	r.Trump = trump
+	r.Deck.SetTrump(trump)
 }
 
 func (r *Round) Play() RoundResult {

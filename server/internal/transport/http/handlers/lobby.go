@@ -69,7 +69,7 @@ func (h *LobbyHandler) JoinLobby(c *gin.Context) {
 	fmt.Printf("User %s\n", userId)
 
 	user := &domain.User{ID: userId, Username: username}
-	client := services.NewClient(lobbyHub, user, conn)
+	client := services.NewClientService(lobbyHub, user, conn)
 
 	if err := lobbyHub.AddClient(client); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

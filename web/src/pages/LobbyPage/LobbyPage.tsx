@@ -8,9 +8,7 @@ import { LobbyChat } from "./components/LobbyChat"
 import { Button } from "@/shared/ui-kit/Button"
 import { gameService } from "@/services/game.service"
 import { useGameStore } from "@/stores/game.store"
-import cn from "classnames"
-import { ESuit } from "@/models/ICard"
-import { Text } from "@/shared/ui-kit/Text"
+import { LobbyGame } from "./components/LobbyGame"
 
 export const LobbyPage = () => {
   const [searchParams] = useSearchParams();
@@ -36,7 +34,7 @@ export const LobbyPage = () => {
   
 
   const PageContent = () => {
-    if (game) return <Game />
+    if (game) return <LobbyGame />
 
     return (
       <div className="flex flex-col flex-grow">
@@ -62,53 +60,3 @@ export const LobbyPage = () => {
   )
 }
 
-const Game = () => {
-  const game = useGameStore((state) => state.game)
-  const getPlayerName = useGameStore((state) => state.getPlayerName)
-
-  console.log(game?.players)
-
-  return (
-    <div className="flex flex-col flex-grow">
-      <div className="flex flex-col gap-4">
-        {game?.players.map((player) => (
-          <div key={player.id} className="flex flex-col gap-1">
-            {getPlayerName(player.id)}
-            <div className="flex gap-2 p-1">
-              {player.hand.map((card, i) => {
-                if (!card || card.isHidden) return (
-                  <span
-                    key={`hidden-${i}`}
-                    className={cn(
-                      "min-h-12 min-w-8 bg-hint",
-                      "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default",
-                    )}
-                  />
-                )
-                return (
-                  <span
-                    key={`${card.suit}${card.type}`}
-                    className={cn(
-                      (card.suit === ESuit.Booby || card.suit === ESuit.Chervy) ? "text-stopRed" : "text-black",
-                      "min-h-12 min-w-8",
-                      "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default hover:scale-105",
-                      card.isHidden ? "bg-hint" : card.isTrump ?  "bg-yellow-200" : "bg-white",
-                    )}
-                  >
-                    {card.type}{card.suit}
-                  </span>
-                )
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="flex w-full py-4">
-        <div className="flex flex-col">
-          {game?.round.firstStepPlayerId && <Text>Ходит: {getPlayerName(game?.round.firstStepPlayerId)}</Text>}
-          {game?.round.praiserId && <Text>Хвалит: {getPlayerName(game?.round.praiserId)}</Text>}
-        </div>
-      </div>
-    </div>
-  )
-}

@@ -10,6 +10,7 @@ type Game struct {
 	Rounds       []Round
 	CurrentRound Round
 	Score        [2]byte
+	Stage        EStage
 }
 
 func NewGame(lobby *Lobby) Game {
@@ -18,6 +19,7 @@ func NewGame(lobby *Lobby) Game {
 		Rounds: make([]Round, 0),
 		Score:  [2]byte{0, 0},
 		Teams:  [2]Team{teamA, teamB},
+		Stage:  StagePreparing,
 	}
 }
 
@@ -29,6 +31,10 @@ func (g *Game) Start() {
 	g.CurrentRound.Init()
 	g.Rounds = append(g.Rounds, round)
 	fmt.Printf("Game FirstStepPlayer %v\n", round.FirstStepPlayer)
+}
+
+func (g *Game) SetStage(stage EStage) {
+	g.Stage = stage
 }
 
 func (g *Game) GetPlayers() [4]Player {

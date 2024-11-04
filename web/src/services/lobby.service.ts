@@ -3,9 +3,9 @@ import { ILobby } from "../models/ILobby"
 import { useAuthStore } from "../stores/auth.store"
 import { useChatStore } from "../stores/chat.store"
 import { useLobbyStore } from "../stores/lobby.store"
-import { EWSAction } from "./actions"
-import { TWsService, wsService } from "./ws.service"
-import { EWSMessage, TConnectionMsg, TErrorMsg, TUpdateSlotsMsg } from "./messages"
+import { EWSAction } from "../api/ws/ws.actions"
+import { TWsService, wsService } from "../api/ws/ws.service"
+import { EWSMessage, TConnectionMsg, TErrorMsg, TUpdateSlotsMsg } from "../api/ws/ws.messages"
 
 class LobbyService {
   private readonly ws: TWsService
