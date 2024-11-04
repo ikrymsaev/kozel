@@ -1,6 +1,9 @@
 package domain
 
-import "fmt"
+import (
+	"fmt"
+	"go-kozel/pkg/utils"
+)
 
 type Game struct {
 	Teams        [2]Team
@@ -38,10 +41,10 @@ func (g *Game) GetPlayers() [4]Player {
 }
 
 func createTeams(slots [4]Slot) (Team, Team) {
-	p1 := NewPlayer("1", "Player 1", 1, nil)
-	p2 := NewPlayer("2", "Player 2", 2, nil)
-	p3 := NewPlayer("3", "Player 3", 3, nil)
-	p4 := NewPlayer("4", "Player 4", 4, nil)
+	p1 := NewPlayer("1", utils.GetRandomName(), 1, nil)
+	p2 := NewPlayer("2", utils.GetRandomName(), 2, nil)
+	p3 := NewPlayer("3", utils.GetRandomName(), 3, nil)
+	p4 := NewPlayer("4", utils.GetRandomName(), 4, nil)
 
 	slot1p := slots[0].Player
 	if slot1p != nil {

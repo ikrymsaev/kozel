@@ -30,6 +30,8 @@ export const useGameStore = create<TGameStore>()(immer((set, get) => ({
     const player = game.players.find((player) => player.id === playerId)
     if (!player) return ''
 
-    return player.name
+    const botPostfix = !player.user ? ' (BOT)' : ''
+
+    return player.name + botPostfix
   }
 })))

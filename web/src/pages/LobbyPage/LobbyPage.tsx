@@ -73,10 +73,18 @@ const Game = () => {
       <div className="flex flex-col gap-4">
         {game?.players.map((player) => (
           <div key={player.id} className="flex flex-col gap-1">
-            {player.name}
+            {getPlayerName(player.id)}
             <div className="flex gap-2 p-1">
-              {player.hand.map((card) => {
-                if (!card) return <div/>
+              {player.hand.map((card, i) => {
+                if (!card || card.isHidden) return (
+                  <span
+                    key={`hidden-${i}`}
+                    className={cn(
+                      "min-h-12 min-w-8 bg-hint",
+                      "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default",
+                    )}
+                  />
+                )
                 return (
                   <span
                     key={`${card.suit}${card.type}`}
