@@ -10,7 +10,7 @@ func IsFirstStep(cards *[]*Card) bool {
 }
 
 func IsWePraiser(player *Player, stake *Stake) bool {
-	praiserTeam := stake.round.praiser.Team
+	praiserTeam := stake.round.Praiser.Team
 	return player.Team == praiserTeam
 }
 

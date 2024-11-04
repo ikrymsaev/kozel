@@ -1,11 +1,12 @@
-package services
+package dto
 
 // @Actions recieved from the client
 type EWSAction int
 
 const (
-	SendMessage EWSAction = iota
-	MoveSlot    EWSAction = iota
+	ESendMessage EWSAction = iota
+	EMoveSlot    EWSAction = iota
+	EStartGame   EWSAction = iota
 )
 
 type WsAction struct {
@@ -20,4 +21,8 @@ type MoveSlotAction struct {
 	Type EWSMessage `json:"type"`
 	From int        `json:"from"`
 	To   int        `json:"to"`
+}
+
+type StartGameAction struct {
+	Type EWSMessage `json:"type"`
 }

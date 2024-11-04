@@ -1,5 +1,5 @@
 import { TWSAction } from "./actions"
-import { EWSMessage, isWsMsg, TConnectionMsg, TMsgMap, TNewMessageMsg, TUpdateSlotsMsg, TWsMessage } from "./messages"
+import { EWSMessage, isWsMsg, TConnectionMsg, TErrorMsg, TMsgMap, TNewMessageMsg, TUpdateGameStateMsg, TUpdateSlotsMsg, TWsMessage } from "./messages"
 import { WS } from "./ws"
 
 type Listeners = {
@@ -16,6 +16,7 @@ class WSService extends WS {
     [EWSMessage.NewMessage]: new Set(),
     [EWSMessage.UpdateSlots]: new Set(),
     [EWSMessage.Error]: new Set(),
+    [EWSMessage.UpdateGameState]: new Set()
   }
 
   public connect(params: string) {
@@ -40,12 +41,21 @@ class WSService extends WS {
     try {
       const message = JSON.parse(e.data) as TWsMessage
       console.log('WS: ', message)
+      /** Кто-то подключился\отключился */
       if (isWsMsg<TConnectionMsg>(message, EWSMessage.Connection))
         return this.listeners[EWSMessage.Connection].forEach((cb) => cb(message))
+      /** Новое сообщение в чате */
       if (isWsMsg<TNewMessageMsg>(message, EWSMessage.NewMessage))
         return this.listeners[EWSMessage.NewMessage].forEach((cb) => cb(message))
+      /** Слоты в лобби обновились */
       if (isWsMsg<TUpdateSlotsMsg>(message, EWSMessage.UpdateSlots))
         return this.listeners[EWSMessage.UpdateSlots].forEach((cb) => cb(message))
+      /** Ошибка */
+      if (isWsMsg<TErrorMsg>(message, EWSMessage.Error))
+        return this.listeners[EWSMessage.Error].forEach((cb) => cb(message))
+      /** Обновилось состояние игры */
+      if (isWsMsg<TUpdateGameStateMsg>(message, EWSMessage.UpdateGameState))
+        return this.listeners[EWSMessage.UpdateGameState].forEach((cb) => cb(message))
       console.error('Unknown message: ', message)
     } catch (e) {
       console.error('Failed to parse message: ', e)

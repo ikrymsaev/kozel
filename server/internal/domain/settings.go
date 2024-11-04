@@ -9,6 +9,10 @@ const (
 	Tref   ESuit = "♣"
 )
 
+func (s *ESuit) String() string {
+	return string(*s)
+}
+
 type ECard string
 
 const (

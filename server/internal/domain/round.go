@@ -3,14 +3,14 @@ package domain
 import "fmt"
 
 type Round struct {
-	isFirstRound    bool       // Первый раунд
-	firstStepPlayer *Player    // Игрок который ходит первым
-	praiser         *Player    // Игрок который хвалит
-	deck            Deck       // Колода
-	trump           *ESuit     // Козырь
-	bribes          [2][]*Card // Кортеж взяток (комада А, команда В)
-	stakes          []*Stake   // Коны
-	game            *Game      // Игра
+	IsFirstRound    bool       `json:"isFirstRound"`
+	FirstStepPlayer *Player    `json:"firstStepPlayer"`
+	Praiser         *Player    `json:"praiser"`
+	Deck            Deck       `json:"deck"`
+	Trump           *ESuit     `json:"trump"`
+	Bribes          [2][]*Card `json:"bribes"`
+	Stakes          []*Stake   `json:"stake"`
+	Game            *Game      `json:"game"`
 }
 
 // Результат раунда
@@ -21,33 +21,41 @@ type RoundResult struct {
 
 func NewRound(game *Game) Round {
 	return Round{
-		isFirstRound: len(game.rounds) == 0,
-		deck:         NewDeck(),
-		game:         game,
-		bribes:       [2][]*Card{},
-		stakes:       []*Stake{},
+		IsFirstRound: len(game.Rounds) == 0,
+		Deck:         NewDeck(),
+		Game:         game,
+		Bribes:       [2][]*Card{},
+		Stakes:       []*Stake{},
 	}
+}
+
+func (r *Round) Init() {
+	r.Deck.Shuffle()
+	r.dealCards()
+	firstPlayer := r.getFirstStepPlayer()
+	fmt.Printf("firstPlayer: %v\n\n", firstPlayer)
+	r.FirstStepPlayer = firstPlayer
 }
 
 func (r *Round) Play() RoundResult {
 	/* Подготовка колоды */
-	fmt.Printf("Deck: %v\n\n", r.deck.CardsString())
+	fmt.Printf("Deck: %v\n\n", r.Deck.CardsString())
 	fmt.Printf("Shuffling deck...\n")
-	r.deck.Shuffle()
-	fmt.Printf("Deck: %v\n\n", r.deck.CardsString())
+	r.Deck.Shuffle()
+	fmt.Printf("Deck: %v\n\n", r.Deck.CardsString())
 	r.dealCards()
 
 	/* Хвалим козырь */
 	println("==================================")
 	fmt.Printf("Round %d\n", 1)
-	fmt.Printf("Praiser: %s\n", r.praiser.Name)
-	trump := r.praiser.PraiseTrump()
-	r.trump = trump
-	r.deck.SetTrump(trump)
+	fmt.Printf("Praiser: %s\n", r.Praiser.Name)
+	trump := r.Praiser.PraiseTrump()
+	r.Trump = trump
+	r.Deck.SetTrump(trump)
 	fmt.Printf("Trump: %s\n", *trump)
 	/* Определение первого хода */
-	r.firstStepPlayer = r.getFirstStepPlayer()
-	fmt.Printf("First step player: %s\n", r.firstStepPlayer.Name)
+	r.FirstStepPlayer = r.getFirstStepPlayer()
+	fmt.Printf("First step player: %s\n", r.FirstStepPlayer.Name)
 	println("==================================")
 
 	for i := 0; i < 8; i++ {
@@ -70,76 +78,76 @@ func (r *Round) Play() RoundResult {
 
 func (r *Round) initStake() {
 	/* Запуск нового кона */
-	stake := NewStake(r, r.firstStepPlayer)
-	r.stakes = append(r.stakes, &stake)
+	stake := NewStake(r, r.FirstStepPlayer)
+	r.Stakes = append(r.Stakes, &stake)
 	stakeResult := stake.Start()
 	fmt.Printf("Stake result >>> %s\n", stakeResult.winner.Name)
 	fmt.Printf("Stake bribes: %v\n\n\n", stakeResult.bribe)
 
-	if stakeResult.winner == &r.game.teams[0].A || stakeResult.winner == &r.game.teams[0].B {
-		r.bribes[0] = append(r.bribes[0], stakeResult.bribe...)
+	if stakeResult.winner == &r.Game.Teams[0].A || stakeResult.winner == &r.Game.Teams[0].B {
+		r.Bribes[0] = append(r.Bribes[0], stakeResult.bribe...)
 	} else {
-		r.bribes[1] = append(r.bribes[1], stakeResult.bribe...)
+		r.Bribes[1] = append(r.Bribes[1], stakeResult.bribe...)
 	}
-	r.firstStepPlayer = stakeResult.winner
+	r.FirstStepPlayer = stakeResult.winner
 }
 
 func (r *Round) getWinner() (*Team, byte) {
-	var score_a byte = GetCardsScore(r.bribes[0])
-	var score_b byte = GetCardsScore(r.bribes[1])
+	var score_a byte = GetCardsScore(r.Bribes[0])
+	var score_b byte = GetCardsScore(r.Bribes[1])
 
 	fmt.Printf("Team A bribes score: %d\n", score_a)
 	fmt.Printf("Team B bribes score: %d\n", score_b)
 
 	if score_a > score_b {
-		isPraiser := r.praiser.Team == &r.game.teams[0]
-		return &r.game.teams[0], GetWinnerScores(isPraiser, score_a)
+		isPraiser := r.Praiser.Team == &r.Game.Teams[0]
+		return &r.Game.Teams[0], GetWinnerScores(isPraiser, score_a)
 	}
 	if score_a < score_b {
-		isPraiser := r.praiser.Team == &r.game.teams[1]
-		return &r.game.teams[1], GetWinnerScores(isPraiser, score_b)
+		isPraiser := r.Praiser.Team == &r.Game.Teams[1]
+		return &r.Game.Teams[1], GetWinnerScores(isPraiser, score_b)
 	}
 	return nil, 0
 }
 
 func (r *Round) getFirstStepPlayer() *Player {
-	if r.isFirstRound {
-		return &r.game.teams[0].A
+	if r.IsFirstRound {
+		return &r.Game.Teams[0].A
 	}
-	return &r.game.teams[1].A
+	return &r.Game.Teams[1].A
 }
 
 func (r *Round) dealCards() {
-	cards := &r.deck.Cards
+	cards := &r.Deck.Cards
 	for i := range cards {
 		card := &cards[i]
 		isPraiserCard := (card.CardSuit.Suit == Tref && card.CardType.Type == Jack) // TODO: refactor
 
 		if i < 8 {
-			r.game.teams[0].A.GetCard(card)
+			r.Game.Teams[0].A.GetCard(card)
 			if isPraiserCard {
-				r.praiser = &r.game.teams[0].A
+				r.Praiser = &r.Game.Teams[0].A
 			}
 		} else if i < 16 {
-			r.game.teams[0].B.GetCard(card)
+			r.Game.Teams[0].B.GetCard(card)
 			if isPraiserCard {
-				r.praiser = &r.game.teams[0].B
+				r.Praiser = &r.Game.Teams[0].B
 			}
 		} else if i < 24 {
-			r.game.teams[1].A.GetCard(card)
+			r.Game.Teams[1].A.GetCard(card)
 			if isPraiserCard {
-				r.praiser = &r.game.teams[1].A
+				r.Praiser = &r.Game.Teams[1].A
 			}
 		} else {
-			r.game.teams[1].B.GetCard(card)
+			r.Game.Teams[1].B.GetCard(card)
 			if isPraiserCard {
-				r.praiser = &r.game.teams[1].B
+				r.Praiser = &r.Game.Teams[1].B
 			}
 		}
 	}
 
-	fmt.Printf("Dealed to %s\n", r.game.teams[0].A.HandString())
-	fmt.Printf("Dealed to %s\n", r.game.teams[0].B.HandString())
-	fmt.Printf("Dealed to %s\n", r.game.teams[1].A.HandString())
-	fmt.Printf("Dealed to %s\n", r.game.teams[1].B.HandString())
+	fmt.Printf("Dealed to %s\n", r.Game.Teams[0].A.HandString())
+	fmt.Printf("Dealed to %s\n", r.Game.Teams[0].B.HandString())
+	fmt.Printf("Dealed to %s\n", r.Game.Teams[1].A.HandString())
+	fmt.Printf("Dealed to %s\n", r.Game.Teams[1].B.HandString())
 }

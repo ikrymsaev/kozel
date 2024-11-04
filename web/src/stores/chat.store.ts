@@ -16,11 +16,9 @@ export const useChatStore = create<TChatStore>()(immer((set) => ({
   /** State */
   messages: [],
   /** Actions */
-  addMessage: (msg: IChatMessage) => {
-    set((state) => {
-      state.messages.push(msg)
-    })
-  },
+  addMessage: (msg: IChatMessage) => set((state) => {
+    state.messages.push(msg)
+  }),
   reset: () => set((state) => {
     state.messages = [];
   })

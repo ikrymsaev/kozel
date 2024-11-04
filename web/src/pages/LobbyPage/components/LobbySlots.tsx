@@ -6,14 +6,16 @@ import UpIcon from "/icons/up.svg"
 import DownIcon from "/icons/down.svg"
 import { lobbyService } from "../../../services/lobby.service"
 import { useSearchParams } from "react-router-dom"
+import { Text } from "@/shared/ui-kit/Text"
 
 export const LobbySlots = () => {
   const slots = useLobbyStore((state) => state.slots)
 
   return (
-    <div>
-      <h5>Lobby Players</h5>
-      <div className="flex flex-col gap-2 border-2 rounded-sm">
+    <div className="flex flex-col gap-2">
+      <Text type="header">Lobby</Text>
+      <Text>select players position:</Text>
+      <div className="flex flex-col gap-2">
         {slots.map((slot) => <Slot key={slot.order} slot={slot} />)}
       </div>
     </div>

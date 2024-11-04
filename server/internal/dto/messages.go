@@ -1,4 +1,4 @@
-package services
+package dto
 
 import "go-kozel/internal/domain"
 
@@ -10,6 +10,7 @@ const (
 	Connection  EWSMessage = iota
 	NewMessage  EWSMessage = iota
 	UpdateSlots EWSMessage = iota
+	GameState   EWSMessage = iota
 )
 
 type WsMessage struct {
@@ -37,4 +38,9 @@ type ConnectionMessage struct {
 type UpdateSlotsMessage struct {
 	Type  EWSMessage     `json:"type"`
 	Slots [4]domain.Slot `json:"slots"`
+}
+
+type GameStateMessage struct {
+	Type EWSMessage     `json:"type"`
+	Game GameStateModel `json:"game"`
 }

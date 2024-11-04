@@ -39,13 +39,13 @@ func (s *Stake) Start() StakeResult {
 // Переключатель текущего хода
 func (s *Stake) turn() {
 	if s.currentPlayer.Position == 1 {
-		s.currentPlayer = &s.round.game.teams[1].A
+		s.currentPlayer = &s.round.Game.Teams[1].A
 	} else if s.currentPlayer.Position == 2 {
-		s.currentPlayer = &s.round.game.teams[0].B
+		s.currentPlayer = &s.round.Game.Teams[0].B
 	} else if s.currentPlayer.Position == 3 {
-		s.currentPlayer = &s.round.game.teams[1].B
+		s.currentPlayer = &s.round.Game.Teams[1].B
 	} else if s.currentPlayer.Position == 4 {
-		s.currentPlayer = &s.round.game.teams[0].A
+		s.currentPlayer = &s.round.Game.Teams[0].A
 	}
 }
 
@@ -54,7 +54,7 @@ func (s *Stake) GetStakeSuit() *ESuit {
 		return nil
 	}
 	if s.cards[0].CardType.Type == Jack {
-		return s.round.trump
+		return s.round.Trump
 	}
 
 	return &s.cards[0].CardSuit.Suit

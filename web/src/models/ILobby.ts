@@ -1,4 +1,4 @@
-import { IPlayer } from "./IPlayer"
+import { ILobbyMember, IPlayer } from "./IPlayer"
 
 export interface ILobby {
   id: string
@@ -8,5 +8,5 @@ export interface ILobby {
 
 export interface ILobbySlot {
   order: number
-  player?: IPlayer
+  player?: ILobbyMember
 }

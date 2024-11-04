@@ -5,7 +5,7 @@ import { useChatStore } from "../stores/chat.store"
 import { useLobbyStore } from "../stores/lobby.store"
 import { EWSAction } from "./actions"
 import { TWsService, wsService } from "./ws.service"
-import { EWSMessage, TConnectionMsg, TUpdateSlotsMsg } from "./messages"
+import { EWSMessage, TConnectionMsg, TErrorMsg, TUpdateSlotsMsg } from "./messages"
 
 class LobbyService {
   private readonly ws: TWsService
@@ -13,6 +13,7 @@ class LobbyService {
     this.ws = wsService
     this.ws.listen(EWSMessage.Connection, this.onConnect)
     this.ws.listen(EWSMessage.UpdateSlots, this.onUpdateSlots)
+    this.ws.listen(EWSMessage.Error, this.onError)
   }
 
   public getLobbyList = async () => {
@@ -81,6 +82,11 @@ class LobbyService {
 
   public moveSlot = (from: number, to: number) => {
     this.ws.send({ type: EWSAction.MoveSlot, from, to })
+  }
+
+  private onError = (msg: TErrorMsg) => {
+    console.error(msg)
+    toast(msg.error, { type: 'error' })
   }
 
   private onUpdateSlots = (m: TUpdateSlotsMsg) => {

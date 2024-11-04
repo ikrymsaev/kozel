@@ -5,20 +5,26 @@ import (
 )
 
 type Player struct {
-	Id       int
-	Name     string
-	Hand     []*Card
-	Position byte
-	Team     *Team
+	Id       string  `json:"id"`
+	Name     string  `json:"name"`
+	Hand     []*Card `json:"hand"`
+	Position byte    `json:"position"`
+	Team     *Team   `json:"team"`
+	User     *User   `json:"user"`
 }
 
-func NewPlayer(id int, name string, position byte) Player {
+func NewPlayer(id string, name string, position byte, user *User) Player {
 	return Player{
 		Id:       id,
 		Name:     name,
 		Hand:     []*Card{},
 		Position: position,
+		User:     user,
 	}
+}
+
+func (p *Player) IsBot() bool {
+	return p.User == nil
 }
 
 func (p *Player) GetCard(card *Card) {
@@ -56,8 +62,8 @@ func (p *Player) removeCardFromHand(card *Card) {
 // Логика остальных ходов
 func (p *Player) otherStepsLogic(stake *Stake) *Card {
 	stackSuit := stake.GetStakeSuit()
-	isTrumpStack := stackSuit == stake.round.trump
-	myTrumpCards := GetCardsBySuit(stake.round.trump, &p.Hand)
+	isTrumpStack := stackSuit == stake.round.Trump
+	myTrumpCards := GetCardsBySuit(stake.round.Trump, &p.Hand)
 
 	// Заход не по козырю
 	if !isTrumpStack {
@@ -141,7 +147,7 @@ func (p *Player) FindCardInHand(cardType ECard, suit ESuit) *Card {
 func (p *Player) getJacksInGame(stake *Stake) []*Card {
 	jacks := make([]*Card, 0)
 
-	for _, card := range stake.round.deck.Cards {
+	for _, card := range stake.round.Deck.Cards {
 		if card.CardType.Type == Jack && !card.IsUsed && card.Owner != p {
 			jacks = append(jacks, &card)
 		}
@@ -206,14 +212,14 @@ func (p *Player) tenLogic(stake *Stake) (bool, *Card) {
 			continue
 		}
 		// Если в игре есть туз то не рискуем 10
-		isAceInDeck := stake.round.deck.IsHasAce(&ten.CardSuit.Suit)
+		isAceInDeck := stake.round.Deck.IsHasAce(&ten.CardSuit.Suit)
 		isMyAce := IsHasAce(&ten.CardSuit.Suit, &p.Hand)
 		if isAceInDeck && !isMyAce {
 			continue
 		}
 
 		// Если в игре достаточно мастей, то рискуя ходим 10
-		suitsInGame := len(stake.round.deck.GetSuitsInGame(&ten.CardSuit.Suit)) - 1
+		suitsInGame := len(stake.round.Deck.GetSuitsInGame(&ten.CardSuit.Suit)) - 1
 		if suitsInGame > 2 {
 			return true, ten
 		}
@@ -242,7 +248,7 @@ func (p *Player) aceLogic(stake *Stake) (bool, *Card) {
 			continue
 		}
 		// Если в игре достаточно мастей, то рискуя ходим тузом
-		suitsInGame := len(stake.round.deck.GetSuitsInGame(&ace.CardSuit.Suit)) - 1
+		suitsInGame := len(stake.round.Deck.GetSuitsInGame(&ace.CardSuit.Suit)) - 1
 		if suitsInGame > 1 {
 			return true, ace
 		}
@@ -264,8 +270,8 @@ func (p *Player) trumpLogic(stake *Stake) (bool, *Card) {
 		return true, myOlderTrump
 	}
 
-	hasJackInGame := stake.round.deck.HasJackInGame()
-	olderTrumpInGame := stake.round.deck.GetOlderTrumpInGame()
+	hasJackInGame := stake.round.Deck.HasJackInGame()
+	olderTrumpInGame := stake.round.Deck.GetOlderTrumpInGame()
 
 	isOlderTrumpIsMine := myOlderTrump != nil && myOlderTrump.CardType.Type == olderTrumpInGame.CardType.Type
 
@@ -292,7 +298,7 @@ func (p *Player) jackLogic(stake *Stake, wePraiser bool) (bool, *Card) {
 	if myOlderJack == nil {
 		return false, nil
 	}
-	stepWithJack := IsMyJackIsOlder(myOlderJack, &stake.round.deck, wePraiser) // Проверяем страший ли в игре
+	stepWithJack := IsMyJackIsOlder(myOlderJack, &stake.round.Deck, wePraiser) // Проверяем страший ли в игре
 	return stepWithJack, myOlderJack
 }
 
@@ -371,8 +377,8 @@ func (p *Player) HandString() string {
 
 // Считаем количество невышедших козырей
 func (p *Player) getTrumpsInGameCount(stake *Stake) int {
-	trumpsInGameCount := len(stake.round.deck.GetTrumpsInGame())
-	jacksInGameCount := len(stake.round.deck.GetJacksInGame())
+	trumpsInGameCount := len(stake.round.Deck.GetTrumpsInGame())
+	jacksInGameCount := len(stake.round.Deck.GetJacksInGame())
 	myTrumpsCount := len(GetTrumpCards(&p.Hand))
 	myJacksCount := len(GetJacks(&p.Hand))
 	totalJacksInGame := jacksInGameCount - myJacksCount

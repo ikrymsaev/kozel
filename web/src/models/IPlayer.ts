@@ -1,6 +1,16 @@
+import { ICard } from "./ICard"
+
+export interface IUser {
+  id: string
+  username: string
+}
+
 export interface IPlayer {
 	id: string
-	username: string
+	name: string
+  hand: ICard[] | null[]
+  position: number
+  user: IUser
 }
 
 /** Информация о члене лобби */

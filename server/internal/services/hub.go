@@ -12,13 +12,13 @@ type HubEvent struct {
 }
 
 type Hub struct {
-	Lobbies   map[string]*Lobby
+	Lobbies   map[string]*LobbyService
 	listeners map[*chan *HubEvent]bool
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		Lobbies:   make(map[string]*Lobby),
+		Lobbies:   make(map[string]*LobbyService),
 		listeners: make(map[*chan *HubEvent]bool),
 	}
 }
@@ -30,13 +30,13 @@ func (h *Hub) Unlisten(listener *chan *HubEvent) {
 	delete(h.listeners, listener)
 }
 
-func (h *Hub) CreateNewLobby(id string, name string) *Lobby {
+func (h *Hub) CreateNewLobby(id string, name string) *LobbyService {
 	if _, ok := h.Lobbies[id]; ok {
 		fmt.Printf("lobby with id %s already exists\n", id)
 		return nil
 	}
 
-	newLobby := NewLobby(id, name, h)
+	newLobby := NewLobbyService(id, name, h)
 	h.Lobbies[id] = newLobby
 	go newLobby.Run()
 
@@ -48,7 +48,7 @@ func (h *Hub) CreateNewLobby(id string, name string) *Lobby {
 	return newLobby
 }
 
-func (h *Hub) GetHubLobby(id string) *Lobby {
+func (h *Hub) GetHubLobby(id string) *LobbyService {
 	if _, ok := h.Lobbies[id]; !ok {
 		fmt.Printf("lobby with id %s not found\n", id)
 		return nil

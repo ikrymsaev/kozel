@@ -3,17 +3,17 @@ package domain
 import "fmt"
 
 type Game struct {
-	teams  [2]Team
-	rounds []Round
-	score  [2]byte
+	Teams  [2]Team
+	Rounds []Round
+	Score  [2]byte
 }
 
-func NewGame() Game {
-	teamA, teamB := createTeams()
+func NewGame(lobby *Lobby) Game {
+	teamA, teamB := createTeams(lobby.Slots)
 	return Game{
-		rounds: make([]Round, 0),
-		score:  [2]byte{0, 0},
-		teams:  [2]Team{teamA, teamB},
+		Rounds: make([]Round, 0),
+		Score:  [2]byte{0, 0},
+		Teams:  [2]Team{teamA, teamB},
 	}
 }
 
@@ -21,18 +21,54 @@ func (g *Game) Start() {
 	println("Starting game...")
 
 	round := NewRound(g)
-	g.rounds = append(g.rounds, round)
-
-	result := round.Play()
-
-	fmt.Printf("Round result >>> %s\n", result.winner.A.Name)
+	g.Rounds = append(g.Rounds, round)
+	round.Init()
+	fmt.Printf("Game FirstStepPlayer %v\n", round.FirstStepPlayer)
 }
 
-func createTeams() (Team, Team) {
+func (g *Game) GetCurrentRound() *Round {
+	return &g.Rounds[len(g.Rounds)-1]
+}
+
+func (g *Game) GetPlayers() [4]Player {
+	var players [4]Player
+	players[0] = g.Teams[0].A
+	players[1] = g.Teams[1].A
+	players[2] = g.Teams[0].B
+	players[3] = g.Teams[1].B
+	return players
+}
+
+func createTeams(slots [4]Slot) (Team, Team) {
+	p1 := NewPlayer("1", "Player 1", 1, nil)
+	p2 := NewPlayer("2", "Player 2", 2, nil)
+	p3 := NewPlayer("3", "Player 3", 3, nil)
+	p4 := NewPlayer("4", "Player 4", 4, nil)
+
+	slot1p := slots[0].Player
+	if slot1p != nil {
+		p1 = NewPlayer(slot1p.ID, slot1p.Username, 1, slot1p)
+	}
+
+	slot2p := slots[1].Player
+	if slot2p != nil {
+		p2 = NewPlayer(slot2p.ID, slot2p.Username, 2, slot2p)
+	}
+
+	slot3p := slots[2].Player
+	if slot3p != nil {
+		p3 = NewPlayer(slot3p.ID, slot3p.Username, 3, slot3p)
+	}
+
+	slot4p := slots[3].Player
+	if slot4p != nil {
+		p4 = NewPlayer(slot4p.ID, slot4p.Username, 4, slot4p)
+	}
+
 	teamA := NewTeam(1)
-	teamA.AddPlayers(NewPlayer(1, "Player 1", 1), NewPlayer(3, "Player 3", 3))
+	teamA.AddPlayers(p1, p3)
 	teamB := NewTeam(2)
-	teamB.AddPlayers(NewPlayer(2, "Player 2", 2), NewPlayer(4, "Player 4", 4))
+	teamB.AddPlayers(p2, p4)
 
 	return teamA, teamB
 }

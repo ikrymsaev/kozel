@@ -1,15 +1,16 @@
-package events
+package dto
 
 import "go-kozel/internal/domain"
 
-type ELobbyEvent string
+type ELobbyEvent int
 
 const (
-	Connection ELobbyEvent = "connection"
-	Chat       ELobbyEvent = "chat"
-	MoveSlot   ELobbyEvent = "move_slot_action"
-	Update     ELobbyEvent = "update"
-	Error      ELobbyEvent = "error"
+	EConnectionEvent ELobbyEvent = iota
+	EChatEvent       ELobbyEvent = iota
+	EMoveSlotEvent   ELobbyEvent = iota
+	EUpdateEvent     ELobbyEvent = iota
+	EErrorEvent      ELobbyEvent = iota
+	EGameStateEvent  ELobbyEvent = iota
 )
 
 type ErrorEvent struct {
@@ -33,4 +34,9 @@ type ConnectionEvent struct {
 type UpdateEvent struct {
 	Type  ELobbyEvent
 	Slots [4]domain.Slot
+}
+
+type GameStateEvent struct {
+	Type ELobbyEvent
+	Game domain.Game
 }

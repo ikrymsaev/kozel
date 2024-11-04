@@ -29,10 +29,10 @@ export const LobbyChat = () => {
   }, [])
 
   return (
-    <div className="flex flex-col justify-end flex-grow gap-2">
+    <div className="flex flex-col justify-end flex-grow gap-2 fixed bottom-0 py-2">
       <div
         ref={chatRef}
-        className="flex flex-col flex-grow gap-1 min-h-28 max-h-48 max-w-sm overflow-auto bg-slate-300 rounded-sm"
+        className="flex flex-col flex-grow gap-1 min-h-28 max-h-28 max-w-sm overflow-auto rounded-sm"
       >
         {messages.map((msg, i) => (
           <div key={`msg-${i}`}>
@@ -46,7 +46,7 @@ export const LobbyChat = () => {
             </span>
             <span
               className={cn(
-                "text-slate-800",
+                "text-white",
                 isMineMessage(msg) ? "text-right" : "text-left"
               )}>
               {msg.message}
@@ -55,11 +55,13 @@ export const LobbyChat = () => {
         ))}
       </div>
       
-      <form onSubmit={(e) => e.preventDefault()}>
+      <form onSubmit={(e) => e.preventDefault()} className="flex felx-row gap-2">
         <input
           type="text"
           value={input}
+          placeholder="tap message here..."
           onChange={(e) => setInput(e.target.value)}
+          className="text-black placeholder:text-slate-500 font-light px-1 placeholder:text-sm outline-none rounded-sm flex-grow"
         />
         <button
           type="submit"
