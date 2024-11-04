@@ -38,5 +38,5 @@ type UpdateEvent struct {
 
 type GameStateEvent struct {
 	Type ELobbyEvent
-	Game domain.Game
+	Game *domain.Game
 }

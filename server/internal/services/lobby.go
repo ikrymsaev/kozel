@@ -91,16 +91,7 @@ func (l *LobbyService) StartGame(cl *Client) {
 	}
 	gameService := NewGameService(l)
 	l.GameService = &gameService
-	gameService.Run()
-
-	fmt.Println("Game created")
-
-	for client := range l.Clients {
-		client.gameStateCh <- &dto.GameStateEvent{
-			Type: dto.EGameStateEvent,
-			Game: *l.GameService.Game,
-		}
-	}
+	go gameService.Run()
 }
 
 func (l *LobbyService) sendUpdates() {

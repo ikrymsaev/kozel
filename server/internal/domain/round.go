@@ -33,8 +33,8 @@ func (r *Round) Init() {
 	r.Deck.Shuffle()
 	r.dealCards()
 	firstPlayer := r.getFirstStepPlayer()
-	fmt.Printf("firstPlayer: %v\n\n", firstPlayer)
 	r.FirstStepPlayer = firstPlayer
+	fmt.Printf("Init() firstPlayer: %v\n\n", r.FirstStepPlayer)
 }
 
 func (r *Round) Play() RoundResult {

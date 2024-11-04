@@ -30,8 +30,7 @@ func GetBribesStateModel(bribes [2][]*domain.Card) [2][]CardStateModel {
 	return bribesState
 }
 
-func GetRoundStateModel(round *domain.Round) RoundStateModel {
-	fmt.Printf("GetRoundStateModel: %v\n\n", round)
+func GetRoundStateModel(round domain.Round) RoundStateModel {
 	var firstStepPlayerId string
 	if round.FirstStepPlayer != nil {
 		firstStepPlayerId = round.FirstStepPlayer.Id
@@ -45,6 +44,10 @@ func GetRoundStateModel(round *domain.Round) RoundStateModel {
 	if round.Trump != nil {
 		trump = round.Trump.String()
 	}
+
+	fmt.Printf("firstStepPlayerId: %v\n", firstStepPlayerId)
+	fmt.Printf("praiserId: %v\n", praiserId)
+	fmt.Printf("trump: %v\n", trump)
 
 	return RoundStateModel{
 		FirstStepPlayerId: firstStepPlayerId,
@@ -107,11 +110,10 @@ func NewGameStateModel(game *domain.Game) GameStateModel {
 	for index, player := range game.GetPlayers() {
 		players[index] = GetPlayerStateModel(&player)
 	}
-	currentRound := game.GetCurrentRound()
 
 	return GameStateModel{
 		Players: players,
-		Round:   GetRoundStateModel(currentRound),
+		Round:   GetRoundStateModel(game.CurrentRound),
 		Score:   game.Score,
 	}
 }

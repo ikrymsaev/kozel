@@ -55,13 +55,13 @@ export const LobbyChat = () => {
         ))}
       </div>
       
-      <form onSubmit={(e) => e.preventDefault()} className="flex felx-row gap-2">
+      <form onSubmit={(e) => e.preventDefault()} className="flex flex-row gap-2">
         <input
           type="text"
           value={input}
           placeholder="tap message here..."
           onChange={(e) => setInput(e.target.value)}
-          className="text-black placeholder:text-slate-500 font-light px-1 placeholder:text-sm outline-none rounded-sm flex-grow"
+          className="text-black placeholder:text-slate-500 font-light px-2 placeholder:text-sm outline-none rounded-sm flex-grow bg-opacity-50"
         />
         <button
           type="submit"

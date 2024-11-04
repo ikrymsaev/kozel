@@ -3,9 +3,10 @@ package domain
 import "fmt"
 
 type Game struct {
-	Teams  [2]Team
-	Rounds []Round
-	Score  [2]byte
+	Teams        [2]Team
+	Rounds       []Round
+	CurrentRound Round
+	Score        [2]byte
 }
 
 func NewGame(lobby *Lobby) Game {
@@ -21,13 +22,10 @@ func (g *Game) Start() {
 	println("Starting game...")
 
 	round := NewRound(g)
+	g.CurrentRound = round
+	g.CurrentRound.Init()
 	g.Rounds = append(g.Rounds, round)
-	round.Init()
 	fmt.Printf("Game FirstStepPlayer %v\n", round.FirstStepPlayer)
-}
-
-func (g *Game) GetCurrentRound() *Round {
-	return &g.Rounds[len(g.Rounds)-1]
 }
 
 func (g *Game) GetPlayers() [4]Player {

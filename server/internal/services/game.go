@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"go-kozel/internal/domain"
+	"go-kozel/internal/dto"
 )
 
 type GameService struct {
@@ -19,8 +20,16 @@ func NewGameService(lobby *LobbyService) GameService {
 	}
 }
 
-func (s *GameService) Run() {
-	s.Game.Start()
+func (g *GameService) Run() {
+	g.Game.Start()
 
-	fmt.Printf("Run FirstStepPlayer %v\n", s.Game.GetCurrentRound().FirstStepPlayer)
+	fmt.Printf("Current Round FirstStepPlayer %v\n", g.Game.CurrentRound.FirstStepPlayer)
+	fmt.Println("Game created")
+
+	for client := range g.Lobby.Clients {
+		client.gameStateCh <- &dto.GameStateEvent{
+			Type: dto.EGameStateEvent,
+			Game: g.Game,
+		}
+	}
 }

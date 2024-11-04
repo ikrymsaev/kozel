@@ -149,7 +149,7 @@ func (c *Client) getErrorMsg(event *dto.ErrorEvent) dto.ErrorMessage {
 	}
 }
 func (c *Client) getGameStateMsg(event *dto.GameStateEvent) dto.GameStateMessage {
-	gameModel := dto.NewGameStateModel(&event.Game)
+	gameModel := dto.NewGameStateModel(event.Game)
 
 	for index, player := range gameModel.Players {
 		if player.User == nil || player.User.ID != c.User.ID {

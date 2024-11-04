@@ -10,6 +10,7 @@ import { gameService } from "@/services/game.service"
 import { useGameStore } from "@/stores/game.store"
 import cn from "classnames"
 import { ESuit } from "@/models/ICard"
+import { Text } from "@/shared/ui-kit/Text"
 
 export const LobbyPage = () => {
   const [searchParams] = useSearchParams();
@@ -63,6 +64,7 @@ export const LobbyPage = () => {
 
 const Game = () => {
   const game = useGameStore((state) => state.game)
+  const getPlayerName = useGameStore((state) => state.getPlayerName)
 
   console.log(game?.players)
 
@@ -92,6 +94,12 @@ const Game = () => {
             </div>
           </div>
         ))}
+      </div>
+      <div className="flex w-full py-4">
+        <div className="flex flex-col">
+          {game?.round.firstStepPlayerId && <Text>Ходит: {getPlayerName(game?.round.firstStepPlayerId)}</Text>}
+          {game?.round.praiserId && <Text>Хвалит: {getPlayerName(game?.round.praiserId)}</Text>}
+        </div>
       </div>
     </div>
   )

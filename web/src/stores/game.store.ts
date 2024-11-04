@@ -9,10 +9,11 @@ interface State {
 interface Actions {
   updateGame: (game: IGameState) => void
   reset: () => void
+  getPlayerName: (playerId: string) => string
 }
 type TGameStore = State & Actions;
 
-export const useGameStore = create<TGameStore>()(immer((set) => ({
+export const useGameStore = create<TGameStore>()(immer((set, get) => ({
   /** State */
   game: null,
   /** Actions */
@@ -22,4 +23,13 @@ export const useGameStore = create<TGameStore>()(immer((set) => ({
   reset: () => set(() => ({
     game: null
   })),
+  getPlayerName: (playerId: string): string => {
+    const game = get().game
+    if (!game) return ''
+
+    const player = game.players.find((player) => player.id === playerId)
+    if (!player) return ''
+
+    return player.name
+  }
 })))
