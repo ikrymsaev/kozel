@@ -9,6 +9,7 @@ interface State {
   table: ICard[]
 }
 interface Actions {
+  setRoundResult: (winnerTeam: number, score: number) => void
   updateGame: (game: IGameState) => void
   changeTurn: (playerId: string) => void
   updateStage: (stage: EGameStage) => void
@@ -25,6 +26,14 @@ export const useGameStore = create<TGameStore>()(immer((set, get) => ({
   game: null,
   table: [],
   /** Actions */
+  setRoundResult: (winnerTeam: number, score: number) => set((state) => {
+    if (!state.game) return
+    if (winnerTeam < 1 || winnerTeam > 2) {
+      console.error("Invalid winnerTeam", winnerTeam)
+      return
+    }
+    state.game.score[winnerTeam - 1] += score
+  }),
   moveFromTableToBribes: (winnerId: string, points: number) => set((state) => {
     if (!state.game?.round) return
     const winner = state.game.players.find((player) => player.id === winnerId)

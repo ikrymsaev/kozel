@@ -39,7 +39,7 @@ func (s *Stake) SetPlayerTurn(player *Player) {
 	s.CurrentStep = player
 }
 
-func (s *Stake) GetResult() StakeResult {
+func (s *Stake) CalcResult() StakeResult {
 	println("Getting stake result...")
 	winCard := GetWinCard(&s.Table)
 	return StakeResult{

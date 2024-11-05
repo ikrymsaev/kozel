@@ -18,7 +18,7 @@ export const LobbyGame = () => {
         <div className="flex flex-col">
           {game?.round.trump && <Text>Козырь: <Text type="header">{game.round.trump}</Text></Text>}
           {game?.round.firstStepPlayerId && <Text>Первый ход у {getPlayerName(game.round.firstStepPlayerId)}</Text>}
-          {game?.round.trump && <Text>Ходит: {getPlayerName(game.round.turnPlayerId)}</Text>}
+          {game?.round.turnPlayerId && <Text>Ходит: {getPlayerName(game.round.turnPlayerId)}</Text>}
           {game?.round.praiserId && <Text>Хвалит: {getPlayerName(game.round.praiserId)}</Text>}
         </div>
       </div>
@@ -113,17 +113,27 @@ const PlayersCards = () => {
 
   return (
     <div className="flex flex-row gap-4">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 flex-1">
         {game?.players.map((player) => (
-          <div key={player.id} className="flex flex-col gap-1">
-            {getPlayerName(player.id)}
+          <div key={player.id} className={cn(
+            "flex flex-col gap-1 min-h-28 px-4 py-2 justify-center rounded-md text-black font-semibold",
+            player.team === 1 && "bg-sky-400",
+            player.team === 2 && "bg-red-400",
+          )}>
+            <div className="flex items-center gap-2">
+              {player.id === game?.round.praiserId && <Text className="text-white font-bold">{">$<"}</Text>}
+              {getPlayerName(player.id)}
+              {game?.round.turnPlayerId === player.id && (
+                <Text type="sm-1" className="text-white font-bold">{" <<< ход"}</Text>
+              )}
+            </div>
             <div className="flex gap-2 p-1">
               {player.hand.map((card) => {
                 if (!card || card.isHidden) return (
                   <span
                     key={card.id}
                     className={cn(
-                      "min-h-12 min-w-8 bg-hint",
+                      "min-h-12 min-w-8 bg-gray-400",
                       "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default",
                     )}
                   />
@@ -135,8 +145,8 @@ const PlayersCards = () => {
                     className={cn(
                       (card.suit === ESuit.Booby || card.suit === ESuit.Chervy) ? "text-stopRed" : "text-black",
                       "min-h-12 min-w-8",
-                      "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default hover:scale-105",
-                      card.isHidden ? "bg-hint" : card.isTrump ?  "bg-yellow-200" : "bg-white",
+                      "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 hover:scale-105",
+                      card.isHidden ? "bg-gray-300 cursor-default" : card.isTrump ?  "bg-yellow-200 cursor-pointer" : "bg-white cursor-pointer",
                     )}
                   >
                     {card.type}{card.suit}
@@ -147,7 +157,7 @@ const PlayersCards = () => {
           </div>
         ))}
       </div>
-      <div className="flex flex-col flex-1 border-2 border-s-slate-300 rounded-lg">
+      <div className="flex flex-col flex-1 border-2 border-s-slate-300 rounded-lg overflow-hidden">
         <Text className="text-center">Стол</Text>
         <div className="flex flex-col flex-1 items-center justify-center gap-2 p-2">
           <div className="flex flex-row items-start justify-center gap-2">
@@ -158,8 +168,8 @@ const PlayersCards = () => {
                   className={cn(
                     (card.suit === ESuit.Booby || card.suit === ESuit.Chervy) ? "text-stopRed" : "text-black",
                     "min-h-12 min-w-8",
-                    "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default hover:scale-105",
-                    card.isTrump ?  "bg-yellow-200" : "bg-white",
+                    "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default",
+                    "bg-white",
                   )}
                 >
                   {card.type}{card.suit}
@@ -169,12 +179,21 @@ const PlayersCards = () => {
           </div>
         </div>
         <Text className="text-center">Взятки</Text>
-        <div className="flex flex-row flex-nowrap border-t-2 border-s-slate-300">
-          <div className="flex flex-1 justify-center py-2">
+        <div className="flex flex-row flex-nowrap">
+          <div className="flex flex-1 justify-center py-2 bg-sky-400">
             <Text>{game?.round.bribes[0]}</Text>
           </div>
-          <div className="flex flex-1 justify-center py-2 border-l-2 border-s-slate-300">
+          <div className="flex flex-1 justify-center py-2 bg-red-400">
             <Text>{game?.round.bribes[1]}</Text>
+          </div>
+        </div>
+        <Text className="text-center mt-2">Общий счет</Text>
+        <div className="flex flex-row flex-nowrap">
+          <div className="flex flex-1 justify-center py-2 bg-sky-400">
+            <Text>{game?.score[0]}</Text>
+          </div>
+          <div className="flex flex-1 justify-center py-2 bg-red-400">
+            <Text>{game?.score[1]}</Text>
           </div>
         </div>
       </div>

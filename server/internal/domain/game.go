@@ -37,19 +37,28 @@ func (g *Game) SetStage(stage EStage) {
 	g.Stage = stage
 }
 
-func (g *Game) GetPlayers() [4]Player {
-	var players [4]Player
-	players[0] = g.Teams[0].A
-	players[1] = g.Teams[1].A
-	players[2] = g.Teams[0].B
-	players[3] = g.Teams[1].B
+func (g *Game) AddScoreToTeam(result *RoundResult) {
+	teamId := result.WinTeam.Id
+	score := result.Score
+	g.Score[teamId-1] += score
+}
+
+func (g *Game) GetPlayers() [4]*Player {
+	var players [4]*Player
+	players[0] = &g.Teams[0].A
+	players[1] = &g.Teams[1].A
+	players[2] = &g.Teams[0].B
+	players[3] = &g.Teams[1].B
 	return players
 }
 
 func (g *Game) GetPlayerByUser(user *User) *Player {
-	for _, player := range g.GetPlayers() {
-		if player.User == user {
-			return &player
+	for index := range g.Teams {
+		if g.Teams[index].A.User == user {
+			return &g.Teams[index].A
+		}
+		if g.Teams[index].B.User == user {
+			return &g.Teams[index].B
 		}
 	}
 	return nil

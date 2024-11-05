@@ -1,13 +1,13 @@
 package domain
 
 type Team struct {
-	id   int
+	Id   byte
 	A, B Player
 }
 
-func NewTeam(id int) Team {
+func NewTeam(id byte) Team {
 	return Team{
-		id: id,
+		Id: id,
 	}
 }
 

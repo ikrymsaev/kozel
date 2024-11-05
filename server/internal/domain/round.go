@@ -16,8 +16,8 @@ type Round struct {
 
 // Результат раунда
 type RoundResult struct {
-	winner *Team // Команда победитель
-	scrore byte  // Заработанное количество очков
+	WinTeam *Team // Команда победитель
+	Score   byte  // Заработанное количество очков
 }
 
 func NewRound(game *Game) Round {
@@ -32,6 +32,11 @@ func NewRound(game *Game) Round {
 
 func (r *Round) IsCompleted() bool {
 	return len(r.Stakes) == 8
+}
+
+func (r *Round) GetResult() RoundResult {
+	winTeam, roundScore := r.getWinner()
+	return RoundResult{winTeam, roundScore}
 }
 
 func (r *Round) Init() {
@@ -82,14 +87,22 @@ func (r *Round) Play() RoundResult {
 	winner, roundScore := r.getWinner()
 	println("==================================")
 	if winner != nil {
-		fmt.Printf("Winner Team: %d\n", winner.id)
+		fmt.Printf("Winner Team: %d\n", winner.Id)
 	}
 	fmt.Printf("Round score: %d\n", roundScore)
 	println("==================================")
 
 	return RoundResult{
-		winner: winner,
-		scrore: roundScore,
+		WinTeam: winner,
+		Score:   roundScore,
+	}
+}
+
+func (r *Round) AddBribe(stakeResult *StakeResult) {
+	if stakeResult.Winner == &r.Game.Teams[0].A || stakeResult.Winner == &r.Game.Teams[0].B {
+		r.Bribes[0] = append(r.Bribes[0], stakeResult.Bribe...)
+	} else {
+		r.Bribes[1] = append(r.Bribes[1], stakeResult.Bribe...)
 	}
 }
 

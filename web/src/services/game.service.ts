@@ -1,6 +1,6 @@
 import { useGameStore } from "@/stores/game.store"
 import { EWSAction } from "../api/ws/ws.actions"
-import { EWSMessage, TCardActionMsg, TChangeTurnMsg, TNewTrumpMsg, TStageMsg, TStakeResultMsg, TUpdateGameStateMsg } from "../api/ws/ws.messages"
+import { EWSMessage, TCardActionMsg, TChangeTurnMsg, TNewTrumpMsg, TRoundResultMsg, TStageMsg, TStakeResultMsg, TUpdateGameStateMsg } from "../api/ws/ws.messages"
 import { TWsService, wsService } from "../api/ws/ws.service"
 import { ESuit, ICard } from "@/models/ICard"
 import { toast } from "react-toastify"
@@ -15,6 +15,7 @@ class GameService {
     this.ws.listen(EWSMessage.ChangeTurn, this.onChangeTurn)
     this.ws.listen(EWSMessage.CardAction, this.onCardAction)
     this.ws.listen(EWSMessage.StakeResult, this.onStakeResult)
+    this.ws.listen(EWSMessage.RoundResult, this.onRoundResult)
   }
 
   public startGame = () => {
@@ -27,6 +28,12 @@ class GameService {
 
   public pickCard = (card: ICard) => {
     this.ws.send({ type: EWSAction.MoveCard, cardId: card.id })
+  }
+
+  private onRoundResult = (msg: TRoundResultMsg) => {
+    const gameStore = useGameStore.getState()
+    toast(`Team ${msg.result.winnerTeam} win!!! Get +${msg.result.score} points!`)
+    gameStore.setRoundResult(msg.result.winnerTeam, msg.result.score)
   }
 
   private onStakeResult = (msg: TStakeResultMsg) => {

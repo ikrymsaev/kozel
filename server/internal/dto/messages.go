@@ -16,6 +16,7 @@ const (
 	WSMessageChangeTurn  EWSMessage = iota
 	WSMessageCardAction  EWSMessage = iota
 	WSMessageStakeResult EWSMessage = iota
+	WSMessageRoundResult EWSMessage = iota
 )
 
 type WsMessage struct {
@@ -74,4 +75,9 @@ type CardActionMessage struct {
 type StakeResultMessage struct {
 	Type   EWSMessage       `json:"type"`
 	Result StakeResultModel `json:"result"`
+}
+
+type RoundResultMessage struct {
+	Type   EWSMessage       `json:"type"`
+	Result RoundResultModel `json:"result"`
 }

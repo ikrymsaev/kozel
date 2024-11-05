@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"fmt"
 	"math/rand"
 )
 
@@ -185,10 +184,7 @@ func GetWinCard(cards *[]*Card) *Card {
 	winCard := (*cards)[0]
 
 	for _, card := range *cards {
-		fmt.Printf("card_1: %v\n", winCard)
-		fmt.Printf("card_2: %v\n", card)
 		winCard = GetOlderCard(winCard, card)
-		fmt.Printf("winCard: %v\n", winCard)
 	}
 
 	return winCard

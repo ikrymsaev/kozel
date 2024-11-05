@@ -71,6 +71,7 @@ type PlayerStateModel struct {
 	Hand     []CardStateModel `json:"hand"`
 	Position byte             `json:"position"`
 	User     *domain.User     `json:"user"`
+	Team     byte             `json:"team"`
 }
 
 func GetPlayerStateModel(player *domain.Player) PlayerStateModel {
@@ -81,6 +82,10 @@ func GetPlayerStateModel(player *domain.Player) PlayerStateModel {
 	for _, card := range player.Hand {
 		hand = append(hand, GetCardStateModel(card))
 	}
+	team := byte(0)
+	if player.Team != nil {
+		team = player.Team.Id
+	}
 
 	return PlayerStateModel{
 		Id:       player.Id,
@@ -88,6 +93,7 @@ func GetPlayerStateModel(player *domain.Player) PlayerStateModel {
 		Hand:     hand,
 		Position: player.Position,
 		User:     player.User,
+		Team:     team,
 	}
 }
 
@@ -118,7 +124,7 @@ func GetCardStateModel(card *domain.Card) CardStateModel {
 func NewGameStateModel(game *domain.Game) GameStateModel {
 	players := [4]PlayerStateModel{}
 	for index, player := range game.GetPlayers() {
-		players[index] = GetPlayerStateModel(&player)
+		players[index] = GetPlayerStateModel(player)
 	}
 
 	return GameStateModel{
@@ -143,5 +149,18 @@ func GetStakeResultModel(stakeResult *domain.StakeResult) StakeResultModel {
 	return StakeResultModel{
 		WinnerId:   stakeResult.Winner.Id,
 		BribeScore: score,
+	}
+}
+
+type RoundResultModel struct {
+	WinnerTeam byte `json:"winnerTeam"`
+	Score      byte `json:"score"`
+}
+
+func GetRoundResultModel(roundResult *domain.RoundResult) RoundResultModel {
+	team := roundResult.WinTeam.Id
+	return RoundResultModel{
+		WinnerTeam: team,
+		Score:      roundResult.Score,
 	}
 }

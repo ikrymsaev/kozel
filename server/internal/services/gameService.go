@@ -81,23 +81,20 @@ func (g *GameService) FinishStake() {
 	}
 
 	time.Sleep(3 * time.Second)
-	result := stake.GetResult()
+
+	round := &g.Game.CurrentRound
+	result := stake.CalcResult()
+	round.AddBribe(&result)
 
 	for client := range g.LobbyService.Clients {
 		client.stakeResultCh <- &dto.StakeResultEvent{
-			Type:  dto.EventStakeResult,
-			Stake: &result,
+			Type:   dto.EventStakeResult,
+			Result: &result,
 		}
 	}
 
-	round := &g.Game.CurrentRound
 	if round.IsCompleted() {
-		for client := range g.LobbyService.Clients {
-			client.errorCh <- &dto.ErrorEvent{
-				Type:  dto.EventError,
-				Error: "Round is completed",
-			}
-		}
+		g.NextRound()
 		return
 	}
 
@@ -120,6 +117,26 @@ func (g *GameService) FinishStake() {
 	if winner.IsBot() {
 		g.BotMoveCard(winner)
 	}
+}
+
+func (g *GameService) NextRound() {
+	round := &g.Game.CurrentRound
+	result := round.GetResult()
+
+	fmt.Printf("Round result %v\n", result)
+
+	g.Game.AddScoreToTeam(&result)
+
+	for client := range g.LobbyService.Clients {
+		client.roundResultCh <- &dto.RoundResultEvent{
+			Type:   dto.EventRoundResult,
+			Result: &result,
+		}
+	}
+
+	time.Sleep(2 * time.Second)
+
+	g.Run()
 }
 
 func (g *GameService) NextTurn() {
@@ -184,6 +201,11 @@ func (g *GameService) PraiseTrump(cl *ClientService, trump *domain.ESuit) {
 		return
 	}
 	g.setTrump(trump)
+
+	stepPlayer := round.CurrentStake.CurrentStep
+	if stepPlayer.IsBot() {
+		g.BotMoveCard(stepPlayer)
+	}
 }
 
 func (g *GameService) setTrump(trump *domain.ESuit) {
@@ -228,10 +250,11 @@ func (g *GameService) Run() {
 		time.Sleep(2 * time.Second)
 		trump := round.Praiser.PraiseTrump()
 		g.setTrump(trump)
-	}
-	if round.FirstStepPlayer.IsBot() {
-		fmt.Printf("Bot move card \n")
-		time.Sleep(2 * time.Second)
-		g.BotMoveCard(round.FirstStepPlayer)
+
+		if round.FirstStepPlayer.IsBot() {
+			fmt.Printf("Bot move card \n")
+			time.Sleep(2 * time.Second)
+			g.BotMoveCard(round.FirstStepPlayer)
+		}
 	}
 }

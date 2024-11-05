@@ -41,18 +41,18 @@ func (p *Player) Action(stake *Stake) *Card {
 		actionCard = p.otherStepsLogic(stake) // Не первый ход
 	}
 
-	fmt.Printf("Player %v \n", p.Name)
+	fmt.Printf("Bot: %v \n", p.Name)
 	fmt.Printf("Hand %v \n", p.HandString())
-	fmt.Printf(">>> %v \n\n", actionCard)
+	fmt.Printf("actionCard >>> %v \n\n", actionCard)
 
 	p.removeCardFromHand(actionCard)
 	return actionCard
 }
 
 func (p *Player) PlayerAction(cardId string) (*Card, error) {
-	fmt.Printf("Player %s: Action cardId: %s\n", p.Name, cardId)
 	fmt.Printf("Hand: %v\n", p.Hand)
 	targetCard := GetCardById(&p.Hand, cardId)
+	fmt.Printf("Player %s: targetCard: %v\n", p.Name, targetCard)
 
 	if targetCard == nil {
 		return targetCard, fmt.Errorf("card no founded in hand")
@@ -64,7 +64,7 @@ func (p *Player) PlayerAction(cardId string) (*Card, error) {
 
 func (p *Player) removeCardFromHand(card *Card) {
 	for i := 0; i < len(p.Hand); i++ {
-		if p.Hand[i] == card {
+		if p.Hand[i].Id == card.Id {
 			copy(p.Hand[i:], p.Hand[i+1:])
 			p.Hand = p.Hand[:len(p.Hand)-1]
 			break

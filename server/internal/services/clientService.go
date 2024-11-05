@@ -24,6 +24,7 @@ type ClientService struct {
 	playerStepCh  chan *dto.ChangeStepEvent
 	cardActionCh  chan *dto.CardActionEvent
 	stakeResultCh chan *dto.StakeResultEvent
+	roundResultCh chan *dto.RoundResultEvent
 }
 
 func NewClientService(lobby *LobbyService, user *domain.User, conn *websocket.Conn) *ClientService {
@@ -41,6 +42,7 @@ func NewClientService(lobby *LobbyService, user *domain.User, conn *websocket.Co
 		playerStepCh:  make(chan *dto.ChangeStepEvent, 1),
 		cardActionCh:  make(chan *dto.CardActionEvent, 1),
 		stakeResultCh: make(chan *dto.StakeResultEvent, 1),
+		roundResultCh: make(chan *dto.RoundResultEvent, 1),
 	}
 }
 
@@ -72,6 +74,8 @@ func (c *ClientService) WriteMessage() {
 			c.Conn.WriteJSON(c.getCardActionMsg(event))
 		case event := <-c.stakeResultCh:
 			c.Conn.WriteJSON(c.getStakeResultMsg(event))
+		case event := <-c.roundResultCh:
+			c.Conn.WriteJSON(c.getRoundResultMsg(event))
 		}
 	}
 }
@@ -241,6 +245,13 @@ func (c *ClientService) getCardActionMsg(event *dto.CardActionEvent) dto.CardAct
 func (c *ClientService) getStakeResultMsg(event *dto.StakeResultEvent) dto.StakeResultMessage {
 	return dto.StakeResultMessage{
 		Type:   dto.WSMessageStakeResult,
-		Result: dto.GetStakeResultModel(event.Stake),
+		Result: dto.GetStakeResultModel(event.Result),
+	}
+}
+
+func (c *ClientService) getRoundResultMsg(event *dto.RoundResultEvent) dto.RoundResultMessage {
+	return dto.RoundResultMessage{
+		Type:   dto.WSMessageRoundResult,
+		Result: dto.GetRoundResultModel(event.Result),
 	}
 }

@@ -11,6 +11,7 @@ export interface IPlayer {
   hand: ICard[]
   position: number
   user: IUser
+  team: number
 }
 
 /** Информация о члене лобби */
