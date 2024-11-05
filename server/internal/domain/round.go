@@ -30,6 +30,10 @@ func NewRound(game *Game) Round {
 	}
 }
 
+func (r *Round) IsCompleted() bool {
+	return len(r.Stakes) == 8
+}
+
 func (r *Round) Init() {
 	r.Deck.Shuffle()
 	r.dealCards()

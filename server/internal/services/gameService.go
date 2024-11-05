@@ -68,29 +68,65 @@ func (g *GameService) MoveCard(cl *ClientService, cardId string) {
 	g.NextTurn()
 }
 
+func (g *GameService) FinishStake() {
+	stake := g.Game.CurrentRound.CurrentStake
+
+	stage := domain.StageCalculation
+	g.Game.SetStage(stage)
+	for client := range g.LobbyService.Clients {
+		client.stageCh <- &dto.StageChangeEvent{
+			Type:  dto.EventStageChange,
+			Stage: stage,
+		}
+	}
+
+	time.Sleep(3 * time.Second)
+	result := stake.GetResult()
+
+	for client := range g.LobbyService.Clients {
+		client.stakeResultCh <- &dto.StakeResultEvent{
+			Type:  dto.EventStakeResult,
+			Stake: &result,
+		}
+	}
+
+	round := &g.Game.CurrentRound
+	if round.IsCompleted() {
+		for client := range g.LobbyService.Clients {
+			client.errorCh <- &dto.ErrorEvent{
+				Type:  dto.EventError,
+				Error: "Round is completed",
+			}
+		}
+		return
+	}
+
+	g.Game.SetStage(domain.StagePlayerStep)
+	round.InitStake()
+	winner := result.Winner
+	round.CurrentStake.SetPlayerTurn(winner)
+
+	for client := range g.LobbyService.Clients {
+		client.stageCh <- &dto.StageChangeEvent{
+			Type:  dto.EventStageChange,
+			Stage: domain.StagePlayerStep,
+		}
+		client.playerStepCh <- &dto.ChangeStepEvent{
+			Type:       dto.EventChangeStep,
+			PlayerStep: winner,
+		}
+	}
+
+	if winner.IsBot() {
+		g.BotMoveCard(winner)
+	}
+}
+
 func (g *GameService) NextTurn() {
 	stake := g.Game.CurrentRound.CurrentStake
 
 	if stake.IsCompleted() {
-		stage := domain.StageCalculation
-		g.Game.SetStage(stage)
-		for client := range g.LobbyService.Clients {
-			client.stageCh <- &dto.StageChangeEvent{
-				Type:  dto.EventStageChange,
-				Stage: stage,
-			}
-		}
-
-		time.Sleep(3 * time.Second)
-		result := stake.GetResult()
-
-		for client := range g.LobbyService.Clients {
-			client.stakeResultCh <- &dto.StakeResultEvent{
-				Type:  dto.EventStakeResult,
-				Stake: &result,
-			}
-		}
-
+		g.FinishStake()
 		return
 	}
 
@@ -113,7 +149,7 @@ func (g *GameService) BotMoveCard(bot *domain.Player) {
 	stake := g.Game.CurrentRound.CurrentStake
 	fmt.Printf("Bot action player: %v\n", bot)
 	// Action by Bot
-	time.Sleep(3 * time.Second)
+	time.Sleep(2 * time.Second)
 	fmt.Println("Bot after sleep")
 	actionCard := stake.BotAction(bot)
 	fmt.Printf("Bot selected card: %v\n", actionCard)
@@ -189,13 +225,13 @@ func (g *GameService) Run() {
 
 	if round.Praiser.IsBot() {
 		fmt.Printf("Bot praising trump \n")
-		time.Sleep(3 * time.Second)
+		time.Sleep(2 * time.Second)
 		trump := round.Praiser.PraiseTrump()
 		g.setTrump(trump)
 	}
 	if round.FirstStepPlayer.IsBot() {
 		fmt.Printf("Bot move card \n")
-		time.Sleep(3 * time.Second)
+		time.Sleep(2 * time.Second)
 		g.BotMoveCard(round.FirstStepPlayer)
 	}
 }

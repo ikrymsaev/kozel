@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -158,7 +159,7 @@ func GetNoneTrumpCards(cards *[]*Card) []*Card {
 }
 
 func GetSmallestScoreCard(cards *[]*Card) *Card {
-	var smallestCard *Card
+	smallestCard := (*cards)[0]
 	for _, card := range *cards {
 		if card.CardType.Type != Jack {
 			isSmallest := smallestCard == nil || card.CardType.Score < smallestCard.CardType.Score
@@ -184,7 +185,10 @@ func GetWinCard(cards *[]*Card) *Card {
 	winCard := (*cards)[0]
 
 	for _, card := range *cards {
+		fmt.Printf("card_1: %v\n", winCard)
+		fmt.Printf("card_2: %v\n", card)
 		winCard = GetOlderCard(winCard, card)
+		fmt.Printf("winCard: %v\n", winCard)
 	}
 
 	return winCard
@@ -253,7 +257,7 @@ func GetBestScoreSuitCard(cards *[]*Card, suit *ESuit) *Card {
 }
 
 func GetBestScoreCard(cards *[]*Card) *Card {
-	var bestScoreCard *Card
+	bestScoreCard := (*cards)[0]
 	for _, card := range *cards {
 		if bestScoreCard == nil || card.CardType.Score > bestScoreCard.CardType.Score {
 			bestScoreCard = card

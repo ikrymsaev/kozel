@@ -101,6 +101,7 @@ func (p *Player) otherStepsLogic(stake *Stake) *Card {
 	isOurBribe := p.isOurBribe(&stake.Table)
 	// Если взятка не наша
 	if !isOurBribe {
+		fmt.Println("!isOurBribe")
 		// TODO Если смогу перебить
 		if len(myTrumpCards) == 0 {
 			return p.Hand[0]
@@ -110,21 +111,30 @@ func (p *Player) otherStepsLogic(stake *Stake) *Card {
 			myOlderJack := GetOlderJack(&p.Hand)
 			if myOlderJack != nil && myOlderJack.CardSuit.Order > winCard.CardSuit.Order {
 				return myOlderJack
+			} else {
+				mySmallestTrump := GetSmallestScoreTrump(&p.Hand)
+				if mySmallestTrump != nil {
+					return mySmallestTrump
+				}
+				return GetSmallestScoreCard(&p.Hand)
 			}
 		}
 		myOlderTrump := GetOlderTrump(&p.Hand)
-		if myOlderTrump == nil {
-			return GetSmallestScoreTrump(&p.Hand)
-		}
-		if myOlderTrump.CardType.Order > winCard.CardType.Order {
+		if myOlderTrump != nil && myOlderTrump.CardType.Order > winCard.CardType.Order {
 			return myOlderTrump
 		}
-		return GetSmallestScoreCard(&p.Hand)
+		myOlderJack := GetOlderJack(&p.Hand)
+		if myOlderJack != nil {
+			return myOlderJack
+		}
+
+		if myOlderTrump == nil {
+			return GetSmallestScoreCard(&p.Hand)
+		}
+		return myOlderTrump
 	}
 	// Если взятка наша
 	hasJacksInGame := len(p.getJacksInGame(stake)) > 0
-	myTen := p.FindCardInHand(Ten, *stackSuit)
-	myAce := p.FindCardInHand(Ace, *stackSuit)
 
 	if hasJacksInGame {
 		bestScoreSuitCard := GetBestScoreSuitCard(&p.Hand, stackSuit)
@@ -132,9 +142,11 @@ func (p *Player) otherStepsLogic(stake *Stake) *Card {
 			return bestScoreSuitCard
 		}
 	}
+	myAce := p.FindCardInHand(Ace, *stackSuit)
 	if myAce != nil {
 		return myAce
 	}
+	myTen := p.FindCardInHand(Ten, *stackSuit)
 	if myTen != nil {
 		return myTen
 	}
