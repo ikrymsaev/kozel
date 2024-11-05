@@ -16,7 +16,8 @@ export enum EWSMessage {
   Stage,
   NewTrump,
   ChangeTurn,
-  CardAction
+  CardAction,
+  StakeResult,
 }
 
 export type TWsBaseMsg = { type: EWSMessage}
@@ -52,14 +53,21 @@ export type TStageMsg = TWsBaseMsg & {
 export type TNewTrumpMsg = TWsBaseMsg & {
   trump: ESuit
 }
-
+/** Изменился ход */
 export type TChangeTurnMsg = TWsBaseMsg & {
   turnPlayerId: string
 }
-
+/** Игрок пошёл картой */
 export type TCardActionMsg = TWsBaseMsg & {
   playerId: string
   card: ICard
+}
+
+export type TStakeResultMsg = TWsBaseMsg & {
+  result: {
+    winnerId: string
+    bribeScore: number
+  }
 }
 
 export type TWsMessage =
@@ -72,6 +80,7 @@ export type TWsMessage =
   | TNewTrumpMsg
   | TChangeTurnMsg
   | TCardActionMsg
+  | TStakeResultMsg
 
 export type TMsgMap = {
   [EWSMessage.Error]: TErrorMsg
@@ -83,6 +92,7 @@ export type TMsgMap = {
   [EWSMessage.NewTrump]: TNewTrumpMsg
   [EWSMessage.ChangeTurn]: TChangeTurnMsg
   [EWSMessage.CardAction]: TCardActionMsg
+  [EWSMessage.StakeResult]: TStakeResultMsg
 }
 
 export const isWsMsg = <T extends TWsMessage>(msg: TWsMessage, type: EWSMessage): msg is T => msg.type === type

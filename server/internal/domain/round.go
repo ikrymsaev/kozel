@@ -94,15 +94,15 @@ func (r *Round) initStake() {
 	stake := NewStake(r, r.FirstStepPlayer)
 	r.Stakes = append(r.Stakes, &stake)
 	stakeResult := stake.Start()
-	fmt.Printf("Stake result >>> %s\n", stakeResult.winner.Name)
-	fmt.Printf("Stake bribes: %v\n\n\n", stakeResult.bribe)
+	fmt.Printf("Stake result >>> %s\n", stakeResult.Winner.Name)
+	fmt.Printf("Stake bribes: %v\n\n\n", stakeResult.Bribe)
 
-	if stakeResult.winner == &r.Game.Teams[0].A || stakeResult.winner == &r.Game.Teams[0].B {
-		r.Bribes[0] = append(r.Bribes[0], stakeResult.bribe...)
+	if stakeResult.Winner == &r.Game.Teams[0].A || stakeResult.Winner == &r.Game.Teams[0].B {
+		r.Bribes[0] = append(r.Bribes[0], stakeResult.Bribe...)
 	} else {
-		r.Bribes[1] = append(r.Bribes[1], stakeResult.bribe...)
+		r.Bribes[1] = append(r.Bribes[1], stakeResult.Bribe...)
 	}
-	r.FirstStepPlayer = stakeResult.winner
+	r.FirstStepPlayer = stakeResult.Winner
 }
 
 func (r *Round) getWinner() (*Team, byte) {

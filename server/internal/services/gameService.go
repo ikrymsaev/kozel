@@ -71,20 +71,41 @@ func (g *GameService) MoveCard(cl *ClientService, cardId string) {
 func (g *GameService) NextTurn() {
 	stake := g.Game.CurrentRound.CurrentStake
 
-	if !stake.IsCompleted() {
-		stake.Turn()
-		nextStepPlayer := stake.CurrentStep
-
+	if stake.IsCompleted() {
+		stage := domain.StageCalculation
+		g.Game.SetStage(stage)
 		for client := range g.LobbyService.Clients {
-			client.playerStepCh <- &dto.ChangeStepEvent{
-				Type:       dto.EventChangeStep,
-				PlayerStep: nextStepPlayer,
+			client.stageCh <- &dto.StageChangeEvent{
+				Type:  dto.EventStageChange,
+				Stage: stage,
 			}
 		}
 
-		if nextStepPlayer.IsBot() {
-			g.BotMoveCard(nextStepPlayer)
+		time.Sleep(3 * time.Second)
+		result := stake.GetResult()
+
+		for client := range g.LobbyService.Clients {
+			client.stakeResultCh <- &dto.StakeResultEvent{
+				Type:  dto.EventStakeResult,
+				Stake: &result,
+			}
 		}
+
+		return
+	}
+
+	stake.Turn()
+	nextStepPlayer := stake.CurrentStep
+
+	for client := range g.LobbyService.Clients {
+		client.playerStepCh <- &dto.ChangeStepEvent{
+			Type:       dto.EventChangeStep,
+			PlayerStep: nextStepPlayer,
+		}
+	}
+
+	if nextStepPlayer.IsBot() {
+		g.BotMoveCard(nextStepPlayer)
 	}
 }
 

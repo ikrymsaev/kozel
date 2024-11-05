@@ -14,19 +14,18 @@ type GameStateModel struct {
 
 // Модель раунда
 type RoundStateModel struct {
-	FirstStepPlayerId string              `json:"firstStepPlayerId"`
-	PraiserId         string              `json:"praiserId"`
-	TurnPlayerId      string              `json:"turnPlayerId"`
-	Trump             string              `json:"trump"`
-	Bribes            [2][]CardStateModel `json:"bribes"`
+	FirstStepPlayerId string  `json:"firstStepPlayerId"`
+	PraiserId         string  `json:"praiserId"`
+	TurnPlayerId      string  `json:"turnPlayerId"`
+	Trump             string  `json:"trump"`
+	Bribes            [2]byte `json:"bribes"`
 }
 
-func GetBribesStateModel(bribes [2][]*domain.Card) [2][]CardStateModel {
-	bribesState := [2][]CardStateModel{}
+func GetBribesStateModel(bribes [2][]*domain.Card) [2]byte {
+	bribesState := [2]byte{}
 	for i := 0; i < 2; i++ {
-		bribesState[i] = []CardStateModel{}
 		for _, card := range bribes[i] {
-			bribesState[i] = append(bribesState[i], GetCardStateModel(card))
+			bribesState[i] += card.CardType.Score
 		}
 	}
 	return bribesState
@@ -127,5 +126,22 @@ func NewGameStateModel(game *domain.Game) GameStateModel {
 		Round:   GetRoundStateModel(game.CurrentRound),
 		Score:   game.Score,
 		Stage:   game.Stage,
+	}
+}
+
+type StakeResultModel struct {
+	WinnerId   string `json:"winnerId"`
+	BribeScore byte   `json:"bribeScore"`
+}
+
+func GetStakeResultModel(stakeResult *domain.StakeResult) StakeResultModel {
+	var score byte
+	for _, card := range stakeResult.Bribe {
+		score += card.CardType.Score
+	}
+
+	return StakeResultModel{
+		WinnerId:   stakeResult.Winner.Id,
+		BribeScore: score,
 	}
 }

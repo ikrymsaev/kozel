@@ -5,6 +5,7 @@ export enum EGameStage {
   Preparing,
   Praising,
   PlayerStep,
+  Calculation,
   DealerStep,
   End
 }

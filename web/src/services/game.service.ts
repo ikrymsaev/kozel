@@ -1,6 +1,6 @@
 import { useGameStore } from "@/stores/game.store"
 import { EWSAction } from "../api/ws/ws.actions"
-import { EWSMessage, TCardActionMsg, TChangeTurnMsg, TNewTrumpMsg, TStageMsg, TUpdateGameStateMsg } from "../api/ws/ws.messages"
+import { EWSMessage, TCardActionMsg, TChangeTurnMsg, TNewTrumpMsg, TStageMsg, TStakeResultMsg, TUpdateGameStateMsg } from "../api/ws/ws.messages"
 import { TWsService, wsService } from "../api/ws/ws.service"
 import { ESuit, ICard } from "@/models/ICard"
 import { toast } from "react-toastify"
@@ -14,6 +14,7 @@ class GameService {
     this.ws.listen(EWSMessage.NewTrump, this.onNewTrump)
     this.ws.listen(EWSMessage.ChangeTurn, this.onChangeTurn)
     this.ws.listen(EWSMessage.CardAction, this.onCardAction)
+    this.ws.listen(EWSMessage.StakeResult, this.onStakeResult)
   }
 
   public startGame = () => {
@@ -26,6 +27,12 @@ class GameService {
 
   public pickCard = (card: ICard) => {
     this.ws.send({ type: EWSAction.MoveCard, cardId: card.id })
+  }
+
+  private onStakeResult = (msg: TStakeResultMsg) => {
+    const gameStore = useGameStore.getState()
+    toast(`${gameStore.getPlayerName(msg.result.winnerId)} get bribe with ${msg.result.bribeScore} points!`)
+    gameStore.moveFromTableToBribes(msg.result.winnerId, msg.result.bribeScore)
   }
 
   private onCardAction = (msg: TCardActionMsg) => {

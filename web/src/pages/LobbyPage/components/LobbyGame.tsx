@@ -168,6 +168,15 @@ const PlayersCards = () => {
             })}
           </div>
         </div>
+        <Text className="text-center">Взятки</Text>
+        <div className="flex flex-row flex-nowrap border-t-2 border-s-slate-300">
+          <div className="flex flex-1 justify-center py-2">
+            <Text>{game?.round.bribes[0]}</Text>
+          </div>
+          <div className="flex flex-1 justify-center py-2 border-l-2 border-s-slate-300">
+            <Text>{game?.round.bribes[1]}</Text>
+          </div>
+        </div>
       </div>
     </div>
   )

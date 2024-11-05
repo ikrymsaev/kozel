@@ -2,8 +2,8 @@ package domain
 
 // Результат кона
 type StakeResult struct {
-	winner *Player
-	bribe  []*Card
+	Winner *Player
+	Bribe  []*Card
 }
 
 type Stake struct {
@@ -30,8 +30,17 @@ func (s *Stake) Start() StakeResult {
 	winCard := GetWinCard(&s.Table)
 
 	return StakeResult{
-		winner: winCard.Owner,
-		bribe:  s.Table,
+		Winner: winCard.Owner,
+		Bribe:  s.Table,
+	}
+}
+
+func (s *Stake) GetResult() StakeResult {
+	println("Getting stake result...")
+	winCard := GetWinCard(&s.Table)
+	return StakeResult{
+		Winner: winCard.Owner,
+		Bribe:  s.Table,
 	}
 }
 

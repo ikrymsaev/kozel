@@ -16,6 +16,7 @@ interface Actions {
   reset: () => void
   getPlayerName: (playerId: string) => string
   replaceToTable: (card: ICard) => void
+  moveFromTableToBribes: (winnerId: string, points: number) => void
 }
 type TGameStore = State & Actions;
 
@@ -24,6 +25,17 @@ export const useGameStore = create<TGameStore>()(immer((set, get) => ({
   game: null,
   table: [],
   /** Actions */
+  moveFromTableToBribes: (winnerId: string, points: number) => set((state) => {
+    if (!state.game?.round) return
+    const winner = state.game.players.find((player) => player.id === winnerId)
+    if (!winner) return
+    if (winner.position === 1 || winner.position === 3) {
+      state.game.round.bribes[0] += points
+    } else {
+      state.game.round.bribes[1] += points
+    }
+    state.table = []
+  }),
   replaceToTable: (card: ICard) => set((state) => {
     if (!state.game) return
     for (const player of state.game.players) {

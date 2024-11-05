@@ -23,6 +23,7 @@ type ClientService struct {
 	trumpCh       chan *dto.NewTrumpEvent
 	playerStepCh  chan *dto.ChangeStepEvent
 	cardActionCh  chan *dto.CardActionEvent
+	stakeResultCh chan *dto.StakeResultEvent
 }
 
 func NewClientService(lobby *LobbyService, user *domain.User, conn *websocket.Conn) *ClientService {
@@ -39,6 +40,7 @@ func NewClientService(lobby *LobbyService, user *domain.User, conn *websocket.Co
 		trumpCh:       make(chan *dto.NewTrumpEvent, 1),
 		playerStepCh:  make(chan *dto.ChangeStepEvent, 1),
 		cardActionCh:  make(chan *dto.CardActionEvent, 1),
+		stakeResultCh: make(chan *dto.StakeResultEvent, 1),
 	}
 }
 
@@ -68,6 +70,8 @@ func (c *ClientService) WriteMessage() {
 			c.Conn.WriteJSON(c.getChangeStepMsg(event))
 		case event := <-c.cardActionCh:
 			c.Conn.WriteJSON(c.getCardActionMsg(event))
+		case event := <-c.stakeResultCh:
+			c.Conn.WriteJSON(c.getStakeResultMsg(event))
 		}
 	}
 }
@@ -231,5 +235,12 @@ func (c *ClientService) getCardActionMsg(event *dto.CardActionEvent) dto.CardAct
 		Type:     dto.WSMessageCardAction,
 		PlayerId: event.PlayerId,
 		Card:     dto.GetCardStateModel(event.Card),
+	}
+}
+
+func (c *ClientService) getStakeResultMsg(event *dto.StakeResultEvent) dto.StakeResultMessage {
+	return dto.StakeResultMessage{
+		Type:   dto.WSMessageStakeResult,
+		Result: dto.GetStakeResultModel(event.Stake),
 	}
 }
