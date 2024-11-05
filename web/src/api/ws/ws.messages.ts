@@ -2,7 +2,7 @@
  * @Messages received from the server
  */
 
-import { ESuit } from "@/models/ICard"
+import { ESuit, ICard } from "@/models/ICard"
 import { EGameStage, IGameState } from "@/models/IGame"
 import { ILobbySlot } from "@/models/ILobby"
 import { ILobbyMember } from "@/models/IPlayer"
@@ -14,7 +14,9 @@ export enum EWSMessage {
   UpdateSlots,
   UpdateGameState,
   Stage,
-  NewTrump
+  NewTrump,
+  ChangeTurn,
+  CardAction
 }
 
 export type TWsBaseMsg = { type: EWSMessage}
@@ -51,6 +53,15 @@ export type TNewTrumpMsg = TWsBaseMsg & {
   trump: ESuit
 }
 
+export type TChangeTurnMsg = TWsBaseMsg & {
+  turnPlayerId: string
+}
+
+export type TCardActionMsg = TWsBaseMsg & {
+  playerId: string
+  card: ICard
+}
+
 export type TWsMessage =
   | TErrorMsg
   | TConnectionMsg
@@ -59,6 +70,8 @@ export type TWsMessage =
   | TUpdateGameStateMsg
   | TStageMsg
   | TNewTrumpMsg
+  | TChangeTurnMsg
+  | TCardActionMsg
 
 export type TMsgMap = {
   [EWSMessage.Error]: TErrorMsg
@@ -68,6 +81,8 @@ export type TMsgMap = {
   [EWSMessage.UpdateGameState]: TUpdateGameStateMsg
   [EWSMessage.Stage]: TStageMsg
   [EWSMessage.NewTrump]: TNewTrumpMsg
+  [EWSMessage.ChangeTurn]: TChangeTurnMsg
+  [EWSMessage.CardAction]: TCardActionMsg
 }
 
 export const isWsMsg = <T extends TWsMessage>(msg: TWsMessage, type: EWSMessage): msg is T => msg.type === type

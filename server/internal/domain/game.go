@@ -46,6 +46,15 @@ func (g *Game) GetPlayers() [4]Player {
 	return players
 }
 
+func (g *Game) GetPlayerByUser(user *User) *Player {
+	for _, player := range g.GetPlayers() {
+		if player.User == user {
+			return &player
+		}
+	}
+	return nil
+}
+
 func createTeams(slots [4]Slot) (Team, Team) {
 	p1 := NewPlayer("1", utils.GetRandomName(), 1, nil)
 	p2 := NewPlayer("2", utils.GetRandomName(), 2, nil)

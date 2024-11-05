@@ -16,6 +16,7 @@ type GameStateModel struct {
 type RoundStateModel struct {
 	FirstStepPlayerId string              `json:"firstStepPlayerId"`
 	PraiserId         string              `json:"praiserId"`
+	TurnPlayerId      string              `json:"turnPlayerId"`
 	Trump             string              `json:"trump"`
 	Bribes            [2][]CardStateModel `json:"bribes"`
 }
@@ -45,6 +46,11 @@ func GetRoundStateModel(round domain.Round) RoundStateModel {
 	if round.Trump != nil {
 		trump = round.Trump.String()
 	}
+	turnPlayerId := ""
+
+	if round.CurrentStake != nil && round.CurrentStake.CurrentStep != nil {
+		turnPlayerId = round.CurrentStake.CurrentStep.Id
+	}
 
 	fmt.Printf("firstStepPlayerId: %v\n", firstStepPlayerId)
 	fmt.Printf("praiserId: %v\n", praiserId)
@@ -54,6 +60,7 @@ func GetRoundStateModel(round domain.Round) RoundStateModel {
 		FirstStepPlayerId: firstStepPlayerId,
 		PraiserId:         praiserId,
 		Trump:             trump,
+		TurnPlayerId:      turnPlayerId,
 		Bribes:            GetBribesStateModel(round.Bribes),
 	}
 }
@@ -87,6 +94,7 @@ func GetPlayerStateModel(player *domain.Player) PlayerStateModel {
 
 // Модель карты
 type CardStateModel struct {
+	Id       string `json:"id"`
 	IsHidden bool   `json:"isHidden"`
 	ImageUri string `json:"imageUri"`
 	CardType string `json:"type"`
@@ -99,6 +107,8 @@ func GetCardStateModel(card *domain.Card) CardStateModel {
 		return CardStateModel{}
 	}
 	return CardStateModel{
+		Id:       card.Id,
+		IsHidden: card.IsUsed,
 		ImageUri: card.ImageUri,
 		CardType: card.CardType.Name,
 		CardSuit: card.CardSuit.Name,

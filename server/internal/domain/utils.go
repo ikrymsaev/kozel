@@ -26,6 +26,15 @@ func GetTrumpCards(cards *[]*Card) []*Card {
 	return trumpCards
 }
 
+func GetCardById(cards *[]*Card, id string) *Card {
+	for _, card := range *cards {
+		if card.Id == id {
+			return card
+		}
+	}
+	return nil
+}
+
 func GetJacks(cards *[]*Card) []*Card {
 	var jacks []*Card
 

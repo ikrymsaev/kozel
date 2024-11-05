@@ -17,8 +17,9 @@ export const LobbyGame = () => {
         <GameStage />
         <div className="flex flex-col">
           {game?.round.trump && <Text>Козырь: <Text type="header">{game.round.trump}</Text></Text>}
-          {game?.round.firstStepPlayerId && <Text>Ходит: {getPlayerName(game?.round.firstStepPlayerId)}</Text>}
-          {game?.round.praiserId && <Text>Хвалит: {getPlayerName(game?.round.praiserId)}</Text>}
+          {game?.round.firstStepPlayerId && <Text>Первый ход у {getPlayerName(game.round.firstStepPlayerId)}</Text>}
+          {game?.round.trump && <Text>Ходит: {getPlayerName(game.round.turnPlayerId)}</Text>}
+          {game?.round.praiserId && <Text>Хвалит: {getPlayerName(game.round.praiserId)}</Text>}
         </div>
       </div>
       <PraisingWindow />
@@ -107,32 +108,58 @@ const GameStage = () => {
 
 const PlayersCards = () => {
   const game = useGameStore((state) => state.game)
+  const table = useGameStore((state) => state.table)
   const getPlayerName = useGameStore((state) => state.getPlayerName)
 
   return (
-    <div className="flex flex-col gap-4">
-      {game?.players.map((player) => (
-        <div key={player.id} className="flex flex-col gap-1">
-          {getPlayerName(player.id)}
-          <div className="flex gap-2 p-1">
-            {player.hand.map((card, i) => {
-              if (!card || card.isHidden) return (
-                <span
-                  key={`hidden-${i}`}
-                  className={cn(
-                    "min-h-12 min-w-8 bg-hint",
-                    "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default",
-                  )}
-                />
-              )
+    <div className="flex flex-row gap-4">
+      <div className="flex flex-col gap-4">
+        {game?.players.map((player) => (
+          <div key={player.id} className="flex flex-col gap-1">
+            {getPlayerName(player.id)}
+            <div className="flex gap-2 p-1">
+              {player.hand.map((card) => {
+                if (!card || card.isHidden) return (
+                  <span
+                    key={card.id}
+                    className={cn(
+                      "min-h-12 min-w-8 bg-hint",
+                      "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default",
+                    )}
+                  />
+                )
+                return (
+                  <span
+                    key={card.id}
+                    onClick={() => gameService.pickCard(card)}
+                    className={cn(
+                      (card.suit === ESuit.Booby || card.suit === ESuit.Chervy) ? "text-stopRed" : "text-black",
+                      "min-h-12 min-w-8",
+                      "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default hover:scale-105",
+                      card.isHidden ? "bg-hint" : card.isTrump ?  "bg-yellow-200" : "bg-white",
+                    )}
+                  >
+                    {card.type}{card.suit}
+                  </span>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-col flex-1 border-2 border-s-slate-300 rounded-lg">
+        <Text className="text-center">Стол</Text>
+        <div className="flex flex-col flex-1 items-center justify-center gap-2 p-2">
+          <div className="flex flex-row items-start justify-center gap-2">
+            {table.map((card) => {
               return (
                 <span
-                  key={`${card.suit}${card.type}`}
+                  key={card.id}
                   className={cn(
                     (card.suit === ESuit.Booby || card.suit === ESuit.Chervy) ? "text-stopRed" : "text-black",
                     "min-h-12 min-w-8",
                     "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default hover:scale-105",
-                    card.isHidden ? "bg-hint" : card.isTrump ?  "bg-yellow-200" : "bg-white",
+                    card.isTrump ?  "bg-yellow-200" : "bg-white",
                   )}
                 >
                   {card.type}{card.suit}
@@ -141,7 +168,7 @@ const PlayersCards = () => {
             })}
           </div>
         </div>
-      ))}
+      </div>
     </div>
   )
 }

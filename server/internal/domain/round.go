@@ -11,6 +11,7 @@ type Round struct {
 	Bribes          [2][]*Card `json:"bribes"`
 	Stakes          []*Stake   `json:"stake"`
 	Game            *Game      `json:"game"`
+	CurrentStake    *Stake     `json:"currentStake"`
 }
 
 // Результат раунда
@@ -35,12 +36,18 @@ func (r *Round) Init() {
 	firstPlayer := r.getFirstStepPlayer()
 	r.FirstStepPlayer = firstPlayer
 	r.Game.Stage = StagePraising
-	fmt.Printf("Init() firstPlayer: %v\n\n", r.FirstStepPlayer)
+	fmt.Printf("StagePraising: %v\n\n", r.FirstStepPlayer)
 }
 
 func (r *Round) SetTrump(trump *ESuit) {
 	r.Trump = trump
 	r.Deck.SetTrump(trump)
+}
+
+func (r *Round) InitStake() {
+	stake := NewStake(r, r.FirstStepPlayer)
+	r.CurrentStake = &stake
+	r.Stakes = append(r.Stakes, r.CurrentStake)
 }
 
 func (r *Round) Play() RoundResult {

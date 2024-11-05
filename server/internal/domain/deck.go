@@ -11,7 +11,7 @@ type Deck struct {
 
 func NewDeck() Deck {
 	var cards [32]Card
-	i := 0
+	var i byte = 0
 	for _, suit := range CARD_SUITS {
 		for _, cardType := range CARD_TYPES {
 			uri := fmt.Sprintf("images/%d.jpg", i+1)

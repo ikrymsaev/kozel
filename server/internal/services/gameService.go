@@ -21,6 +21,93 @@ func NewGameService(lobby *LobbyService) GameService {
 	}
 }
 
+func (g *GameService) MoveCard(cl *ClientService, cardId string) {
+	if g.Game.Stage != domain.StagePlayerStep {
+		cl.errorCh <- &dto.ErrorEvent{
+			Type:  dto.EventError,
+			Error: "Wrong stage",
+		}
+		return
+	}
+
+	stake := g.Game.CurrentRound.CurrentStake
+	player := g.Game.GetPlayerByUser(cl.User)
+	if player == nil {
+		cl.errorCh <- &dto.ErrorEvent{
+			Type:  dto.EventError,
+			Error: "Player is NOT User", //!! Must be action by bot
+		}
+		return
+	}
+	if stake.CurrentStep.Id != player.Id {
+		cl.errorCh <- &dto.ErrorEvent{
+			Type:  dto.EventError,
+			Error: "Not your turn",
+		}
+		return
+	}
+
+	// Action by User
+	actionCard, actionErr := stake.PlayerAction(player, cardId)
+	if actionErr != nil {
+		cl.errorCh <- &dto.ErrorEvent{
+			Type:  dto.EventError,
+			Error: actionErr.Error(),
+		}
+		return
+	}
+
+	for client := range g.LobbyService.Clients {
+		client.cardActionCh <- &dto.CardActionEvent{
+			Type:     dto.EventCardAction,
+			Card:     actionCard,
+			PlayerId: player.Id,
+		}
+	}
+
+	g.NextTurn()
+}
+
+func (g *GameService) NextTurn() {
+	stake := g.Game.CurrentRound.CurrentStake
+
+	if !stake.IsCompleted() {
+		stake.Turn()
+		nextStepPlayer := stake.CurrentStep
+
+		for client := range g.LobbyService.Clients {
+			client.playerStepCh <- &dto.ChangeStepEvent{
+				Type:       dto.EventChangeStep,
+				PlayerStep: nextStepPlayer,
+			}
+		}
+
+		if nextStepPlayer.IsBot() {
+			g.BotMoveCard(nextStepPlayer)
+		}
+	}
+}
+
+func (g *GameService) BotMoveCard(bot *domain.Player) {
+	stake := g.Game.CurrentRound.CurrentStake
+	fmt.Printf("Bot action player: %v\n", bot)
+	// Action by Bot
+	time.Sleep(3 * time.Second)
+	fmt.Println("Bot after sleep")
+	actionCard := stake.BotAction(bot)
+	fmt.Printf("Bot selected card: %v\n", actionCard)
+
+	for client := range g.LobbyService.Clients {
+		client.cardActionCh <- &dto.CardActionEvent{
+			Type:     dto.EventCardAction,
+			Card:     actionCard,
+			PlayerId: bot.Id,
+		}
+	}
+
+	g.NextTurn()
+}
+
 func (g *GameService) PraiseTrump(cl *ClientService, trump *domain.ESuit) {
 	round := &g.Game.CurrentRound
 
@@ -46,6 +133,10 @@ func (g *GameService) setTrump(trump *domain.ESuit) {
 	round := &g.Game.CurrentRound
 	round.SetTrump(trump)
 	g.Game.SetStage(domain.StagePlayerStep)
+	round.InitStake()
+
+	stepPlayer := round.CurrentStake.CurrentStep
+
 	for client := range g.LobbyService.Clients {
 		client.trumpCh <- &dto.NewTrumpEvent{
 			Type:  dto.EventNewTrump,
@@ -54,6 +145,10 @@ func (g *GameService) setTrump(trump *domain.ESuit) {
 		client.stageCh <- &dto.StageChangeEvent{
 			Type:  dto.EventStageChange,
 			Stage: domain.StagePlayerStep,
+		}
+		client.playerStepCh <- &dto.ChangeStepEvent{
+			Type:       dto.EventChangeStep,
+			PlayerStep: stepPlayer,
 		}
 	}
 }
@@ -71,11 +166,15 @@ func (g *GameService) Run() {
 		}
 	}
 
-	if round.Praiser.User == nil {
+	if round.Praiser.IsBot() {
 		fmt.Printf("Bot praising trump \n")
 		time.Sleep(3 * time.Second)
 		trump := round.Praiser.PraiseTrump()
 		g.setTrump(trump)
 	}
-
+	if round.FirstStepPlayer.IsBot() {
+		fmt.Printf("Bot move card \n")
+		time.Sleep(3 * time.Second)
+		g.BotMoveCard(round.FirstStepPlayer)
+	}
 }

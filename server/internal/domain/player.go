@@ -35,7 +35,7 @@ func (p *Player) GetCard(card *Card) {
 // Ход игрока
 func (p *Player) Action(stake *Stake) *Card {
 	var actionCard *Card
-	if IsFirstStep(&stake.cards) {
+	if IsFirstStep(&stake.Table) {
 		actionCard = p.firstStepLogic(stake) // Первый ход
 	} else {
 		actionCard = p.otherStepsLogic(stake) // Не первый ход
@@ -47,6 +47,19 @@ func (p *Player) Action(stake *Stake) *Card {
 
 	p.removeCardFromHand(actionCard)
 	return actionCard
+}
+
+func (p *Player) PlayerAction(cardId string) (*Card, error) {
+	fmt.Printf("Player %s: Action cardId: %s\n", p.Name, cardId)
+	fmt.Printf("Hand: %v\n", p.Hand)
+	targetCard := GetCardById(&p.Hand, cardId)
+
+	if targetCard == nil {
+		return targetCard, fmt.Errorf("card no founded in hand")
+	}
+	p.removeCardFromHand(targetCard)
+
+	return targetCard, nil
 }
 
 func (p *Player) removeCardFromHand(card *Card) {
@@ -84,15 +97,15 @@ func (p *Player) otherStepsLogic(stake *Stake) *Card {
 	/*
 	 ? Кон по козырю
 	*/
-	winCard := GetWinCard(&stake.cards)
-	isOurBribe := p.isOurBribe(&stake.cards)
+	winCard := GetWinCard(&stake.Table)
+	isOurBribe := p.isOurBribe(&stake.Table)
 	// Если взятка не наша
 	if !isOurBribe {
 		// TODO Если смогу перебить
 		if len(myTrumpCards) == 0 {
 			return p.Hand[0]
 		}
-		isStartsWithJack := stake.cards[0].CardType.Type == Jack
+		isStartsWithJack := stake.Table[0].CardType.Type == Jack
 		if isStartsWithJack {
 			myOlderJack := GetOlderJack(&p.Hand)
 			if myOlderJack != nil && myOlderJack.CardSuit.Order > winCard.CardSuit.Order {

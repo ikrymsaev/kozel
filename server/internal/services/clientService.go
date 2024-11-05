@@ -21,6 +21,8 @@ type ClientService struct {
 	gameStateCh   chan *dto.GameStateEvent
 	stageCh       chan *dto.StageChangeEvent
 	trumpCh       chan *dto.NewTrumpEvent
+	playerStepCh  chan *dto.ChangeStepEvent
+	cardActionCh  chan *dto.CardActionEvent
 }
 
 func NewClientService(lobby *LobbyService, user *domain.User, conn *websocket.Conn) *ClientService {
@@ -35,6 +37,8 @@ func NewClientService(lobby *LobbyService, user *domain.User, conn *websocket.Co
 		gameStateCh:   make(chan *dto.GameStateEvent, 1),
 		stageCh:       make(chan *dto.StageChangeEvent),
 		trumpCh:       make(chan *dto.NewTrumpEvent, 1),
+		playerStepCh:  make(chan *dto.ChangeStepEvent, 1),
+		cardActionCh:  make(chan *dto.CardActionEvent, 1),
 	}
 }
 
@@ -60,6 +64,10 @@ func (c *ClientService) WriteMessage() {
 			c.Conn.WriteJSON(c.getStageMsg(event))
 		case event := <-c.trumpCh:
 			c.Conn.WriteJSON(c.getTrumpMsg(event))
+		case event := <-c.playerStepCh:
+			c.Conn.WriteJSON(c.getChangeStepMsg(event))
+		case event := <-c.cardActionCh:
+			c.Conn.WriteJSON(c.getCardActionMsg(event))
 		}
 	}
 }
@@ -94,10 +102,22 @@ func (c *ClientService) ReadMessage() {
 			c.parseStartGameAction()
 		case dto.WSActionPraiseTrump:
 			c.parsePraiseTrumpAction(recievedMessage)
+		case dto.WSActionMoveCard:
+			c.parseMoveCardAction(recievedMessage)
 		default:
 			fmt.Printf("unknown action: %v\n", wsMessage.Type)
 		}
 	}
+}
+
+func (c *ClientService) parseMoveCardAction(recievedMessage []byte) {
+	var wsMessage = dto.MoveCardAction{}
+	marshalErr := json.Unmarshal(recievedMessage, &wsMessage)
+	if marshalErr != nil {
+		log.Printf("error: %v", marshalErr)
+		return
+	}
+	c.LobbyService.GameService.MoveCard(c, wsMessage.CardId)
 }
 
 func (c *ClientService) parseStartGameAction() {
@@ -174,8 +194,8 @@ func (c *ClientService) getGameStateMsg(event *dto.GameStateEvent) dto.GameState
 	for index, player := range gameModel.Players {
 		if player.User == nil || player.User.ID != c.User.ID {
 			hiddenHand := []dto.CardStateModel{}
-			for range player.Hand {
-				hiddenHand = append(hiddenHand, dto.CardStateModel{IsHidden: true})
+			for _, card := range player.Hand {
+				hiddenHand = append(hiddenHand, dto.CardStateModel{Id: card.Id, IsHidden: true})
 			}
 			gameModel.Players[index].Hand = hiddenHand
 		}
@@ -196,5 +216,20 @@ func (c *ClientService) getTrumpMsg(event *dto.NewTrumpEvent) dto.NewTrumpMessag
 	return dto.NewTrumpMessage{
 		Type:  dto.WSMEssageNewTrump,
 		Trump: event.Trump,
+	}
+}
+
+func (c *ClientService) getChangeStepMsg(event *dto.ChangeStepEvent) dto.ChangeTurnMessage {
+	return dto.ChangeTurnMessage{
+		Type:         dto.WSMessageChangeTurn,
+		TurnPlayerId: event.PlayerStep.Id,
+	}
+}
+
+func (c *ClientService) getCardActionMsg(event *dto.CardActionEvent) dto.CardActionMessage {
+	return dto.CardActionMessage{
+		Type:     dto.WSMessageCardAction,
+		PlayerId: event.PlayerId,
+		Card:     dto.GetCardStateModel(event.Card),
 	}
 }

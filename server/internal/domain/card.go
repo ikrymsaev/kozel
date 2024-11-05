@@ -1,8 +1,13 @@
 package domain
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/google/uuid"
+)
 
 type Card struct {
+	Id       string
 	ImageUri string
 	CardType CardType
 	CardSuit CardSuit
@@ -12,7 +17,11 @@ type Card struct {
 }
 
 func NewCard(cardType CardType, cardSuit CardSuit, imageUri string) Card {
+
+	// NewCard creates a new Card instance with the given card type, card suit, and image URI.
+	// The card is initially marked as not used and is considered a trump card if its type is Jack.
 	return Card{
+		Id:       uuid.New().String(),
 		ImageUri: imageUri,
 		CardType: cardType,
 		CardSuit: cardSuit,

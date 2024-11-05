@@ -1,8 +1,8 @@
 import { useGameStore } from "@/stores/game.store"
 import { EWSAction } from "../api/ws/ws.actions"
-import { EWSMessage, TNewTrumpMsg, TStageMsg, TUpdateGameStateMsg } from "../api/ws/ws.messages"
+import { EWSMessage, TCardActionMsg, TChangeTurnMsg, TNewTrumpMsg, TStageMsg, TUpdateGameStateMsg } from "../api/ws/ws.messages"
 import { TWsService, wsService } from "../api/ws/ws.service"
-import { ESuit } from "@/models/ICard"
+import { ESuit, ICard } from "@/models/ICard"
 import { toast } from "react-toastify"
 
 class GameService {
@@ -12,6 +12,8 @@ class GameService {
     this.ws.listen(EWSMessage.UpdateGameState, this.onUpdateGameState)
     this.ws.listen(EWSMessage.Stage, this.onUpdateStage)
     this.ws.listen(EWSMessage.NewTrump, this.onNewTrump)
+    this.ws.listen(EWSMessage.ChangeTurn, this.onChangeTurn)
+    this.ws.listen(EWSMessage.CardAction, this.onCardAction)
   }
 
   public startGame = () => {
@@ -20,6 +22,20 @@ class GameService {
 
   public praiseTrump = (trump: ESuit) => {
     this.ws.send({ type: EWSAction.PraiseTrump, trump })
+  }
+
+  public pickCard = (card: ICard) => {
+    this.ws.send({ type: EWSAction.MoveCard, cardId: card.id })
+  }
+
+  private onCardAction = (msg: TCardActionMsg) => {
+    const gameStore = useGameStore.getState()
+    gameStore.replaceToTable(msg.card)
+  }
+
+  private onChangeTurn = (msg: TChangeTurnMsg) => {
+    const gameStore = useGameStore.getState()
+    gameStore.changeTurn(msg.turnPlayerId)
   }
 
   private onNewTrump = (msg: TNewTrumpMsg) => {

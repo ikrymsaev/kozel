@@ -8,7 +8,8 @@ export enum EWSAction {
   SendMessage,
   MoveSlot,
   StartGame,
-  PraiseTrump
+  PraiseTrump,
+  MoveCard
 }
 
 export type TWsBaseAction = { type: EWSAction }
@@ -28,6 +29,10 @@ export type TStartGame = TWsBaseAction
 export type TPraiseTrump = TWsBaseAction & {
   trump: ESuit
 }
+/** Ход игрока */
+export type TMoveCard = TWsBaseAction & {
+  cardId: string
+}
 
 
 export type TWSAction =
@@ -35,3 +40,4 @@ export type TWSAction =
   | TMoveSlot
   | TStartGame
   | TPraiseTrump
+  | TMoveCard

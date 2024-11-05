@@ -10,6 +10,7 @@ const (
 	WSActionMoveSlot    EWSAction = iota
 	WSActionStartGame   EWSAction = iota
 	WSActionPraiseTrump EWSAction = iota
+	WSActionMoveCard    EWSAction = iota
 )
 
 type WsAction struct {
@@ -33,4 +34,9 @@ type StartGameAction struct {
 type PraiseTrumpAction struct {
 	Type  EWSMessage   `json:"type"`
 	Trump domain.ESuit `json:"trump"`
+}
+
+type MoveCardAction struct {
+	Type   EWSMessage `json:"type"`
+	CardId string     `json:"cardId"`
 }
