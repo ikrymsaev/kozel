@@ -1,0 +1,30 @@
+version: "3.7"
+services:
+  server:
+    container_name: go-kozel-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+      - 8090:8090
+    hostname: go-kozel-server
+    restart: unless-stopped
+    volumes:
+      - .:/go-kozel-server
+    networks:
+      - koznet
+  web:
+    container_name: go-kozel-web
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+    hostname: go-kozel-web
+    restart: unless-stopped
+    networks:
+      - koznet
+
+networks:
+  koznet:
