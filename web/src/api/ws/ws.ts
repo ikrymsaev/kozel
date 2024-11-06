@@ -21,10 +21,6 @@ export abstract class WS {
     }
     return method(this.connection)
   }
-
-  // private getConnUrl({ roomId, userId, username }: TConnectionParams) {
-  //   return `ws://localhost:8080/ws/join/${roomId}?user_id=${userId}&username=${username}`
-  // }
 }
 
 export type TConnectionParams = {
