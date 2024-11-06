@@ -16,18 +16,4 @@ export default defineConfig({
     },
   },
   plugins: [react()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://57b41e19c067.vps.myjino.ru',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-      '/ws': {
-        target: 'ws://57b41e19c067.vps.myjino.ru',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/ws/, ''),
-      },
-    },
-  },
 })
