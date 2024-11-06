@@ -1,15 +1,14 @@
 package main
 
 import (
+	"go-kozel/internal/infrastructure/pb"
 	"go-kozel/internal/services"
 	router "go-kozel/internal/transport/http"
-
-	"github.com/pocketbase/pocketbase"
 )
 
 func main() {
-	pb := pocketbase.New()
-	go pb.Start()
+	go pb.Run()
+
 	hub := services.NewHub()
 
 	router.InitRouter(hub)
