@@ -17,7 +17,7 @@ class LobbyService {
   }
 
   public getLobbyList = async () => {
-    const res = await fetch('http://57b41e19c067.vps.myjino.ru/hub/lobbies')
+    const res = await fetch('http://localhost:8080/hub/lobbies')
     const games = await res.json()
     useLobbyStore.setState({ activeGames: games })
   }
@@ -28,7 +28,7 @@ class LobbyService {
     const { addLobby  } = useLobbyStore.getState()
 
     const connect = () => {
-      const es = new EventSource('http://57b41e19c067.vps.myjino.ru/hub/watch_lobbies')
+      const es = new EventSource('http://localhost:8080/hub/watch_lobbies')
       console.log("SSE opened, watching for lobbies...")
       es.addEventListener('new_lobby', (event) => {
         const data = JSON.parse(event.data) as ILobby
@@ -65,7 +65,7 @@ class LobbyService {
     if (!user) return
 
     const { id, username } = user;
-    let url = "http://57b41e19c067.vps.myjino.ru/lobby/new"
+    let url = "http://localhost:8080/lobby/new"
     url += "?user_id=" + id;
     url += "&username=" + username;
     try {
@@ -81,7 +81,7 @@ class LobbyService {
   public joinLobby = async (lobbyId: string) => {
     const user = useAuthStore.getState().user
     if (!user) return
-    let url = "ws://57b41e19c067.vps.myjino.ru/lobby/join/" + lobbyId
+    let url = "ws://localhost:8080/lobby/join/" + lobbyId
     url += "?user_id=" + user.id
     url += "&username=" + user.username
     try {

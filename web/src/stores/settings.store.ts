@@ -16,7 +16,7 @@ export const useSettingsStore = create<TSettingsStore>()(immer((set) => ({
   /** Actions */
   fetchDeck: async () => {
     try {
-      const res = await fetch('http://57b41e19c067.vps.myjino.ru/settings/deck')
+      const res = await fetch('http://localhost:8080/settings/deck')
       const deck = await res.json() || null
       set({ deck })
     } catch (e) {
