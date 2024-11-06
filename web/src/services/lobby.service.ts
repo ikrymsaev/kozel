@@ -25,22 +25,38 @@ class LobbyService {
   public watchLobbies = () => {
     this.getLobbyList()
 
-    const { addLobby,  } = useLobbyStore.getState()
-    const es = new EventSource('http://57b41e19c067.vps.myjino.ru/hub/watch_lobbies')
-    console.log("SSE opened, watching for lobbies...")
-    es.addEventListener('new_lobby', (event) => {
-      const data = JSON.parse(event.data) as ILobby
-      console.log("SSE new_lobby: ", data)
-      addLobby(data)
-    })
+    const { addLobby  } = useLobbyStore.getState()
 
-    es.addEventListener('remove_lobby', (event) => {
-      const lobbyId = event.data
-      console.log("SSE remove_lobby: ", lobbyId)
-      useLobbyStore.getState().removeLobby(lobbyId)
-    })
+    const connect = () => {
+      const es = new EventSource('http://57b41e19c067.vps.myjino.ru/hub/watch_lobbies')
+      console.log("SSE opened, watching for lobbies...")
+      es.addEventListener('new_lobby', (event) => {
+        const data = JSON.parse(event.data) as ILobby
+        console.log("SSE new_lobby: ", data)
+        addLobby(data)
+      })
+  
+      es.addEventListener('remove_lobby', (event) => {
+        const lobbyId = event.data
+        console.log("SSE remove_lobby: ", lobbyId)
+        useLobbyStore.getState().removeLobby(lobbyId)
+      })
+      return {
+        es,
+        close: () => {
+          es.close()
+        },
+      }
+    }
+    const { es, close } = connect()
+    es.onerror = () => {
+      setTimeout(() => {
+        close()
+        connect()
+      }, 3000)
+    }
 
-    return () => es?.close()
+    return close
   }
 
   /** Create a new lobby */
