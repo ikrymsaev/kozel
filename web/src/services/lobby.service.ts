@@ -6,6 +6,7 @@ import { useLobbyStore } from "../stores/lobby.store"
 import { EWSAction } from "../api/ws/ws.actions"
 import { TWsService, wsService } from "../api/ws/ws.service"
 import { EWSMessage, TConnectionMsg, TErrorMsg, TUpdateSlotsMsg } from "../api/ws/ws.messages"
+import { getApiUrl } from "@/shared/utils/get-api-url"
 
 class LobbyService {
   private readonly ws: TWsService
@@ -17,7 +18,7 @@ class LobbyService {
   }
 
   public getLobbyList = async () => {
-    const res = await fetch('http://localhost:8080/hub/lobbies')
+    const res = await fetch(getApiUrl() + '/hub/lobbies')
     const games = await res.json()
     useLobbyStore.setState({ activeGames: games })
   }
@@ -28,7 +29,7 @@ class LobbyService {
     const { addLobby  } = useLobbyStore.getState()
 
     const connect = () => {
-      const es = new EventSource('http://localhost:8080/hub/watch_lobbies')
+      const es = new EventSource(getApiUrl() + '/hub/watch_lobbies')
       console.log("SSE opened, watching for lobbies...")
       es.addEventListener('new_lobby', (event) => {
         const data = JSON.parse(event.data) as ILobby
@@ -65,7 +66,8 @@ class LobbyService {
     if (!user) return
 
     const { id, username } = user;
-    let url = "http://localhost:8080/lobby/new"
+    let url = getApiUrl() +
+    "/lobby/new"
     url += "?user_id=" + id;
     url += "&username=" + username;
     try {
@@ -81,7 +83,7 @@ class LobbyService {
   public joinLobby = async (lobbyId: string) => {
     const user = useAuthStore.getState().user
     if (!user) return
-    let url = "ws://localhost:8080/lobby/join/" + lobbyId
+    let url = getApiUrl("ws") + "/lobby/join/" + lobbyId
     url += "?user_id=" + user.id
     url += "&username=" + user.username
     try {

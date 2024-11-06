@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { ICard } from "../models/ICard";
+import { getApiUrl } from "@/shared/utils/get-api-url";
 
 interface State {
   deck: ICard[] | null
@@ -16,7 +17,7 @@ export const useSettingsStore = create<TSettingsStore>()(immer((set) => ({
   /** Actions */
   fetchDeck: async () => {
     try {
-      const res = await fetch('http://localhost:8080/settings/deck')
+      const res = await fetch(getApiUrl() + '/settings/deck')
       const deck = await res.json() || null
       set({ deck })
     } catch (e) {

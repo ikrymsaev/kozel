@@ -9,7 +9,7 @@ services:
       - 8080:8080
       - 8090:8090
     hostname: go-kozel-server
-    restart: unless-stopped
+    restart: always
     volumes:
       - .:/go-kozel-server
   web:
@@ -23,12 +23,5 @@ services:
     restart: unless-stopped
     depends_on:
       - server
-  nginx-gateway:
-    image: nginx:stable-alpine
-    volumes:
-      - ./nginx:/etc/nginx/conf.d
-      - /etc/ssl:/etc/ssl
-    ports:
-      - 80:80
-      - 443:443
-    restart: always
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
