@@ -1,6 +1,6 @@
 import { useGameStore } from "@/stores/game.store"
 import { EWSAction } from "../api/ws/ws.actions"
-import { EWSMessage, TCardActionMsg, TChangeTurnMsg, TNewTrumpMsg, TRoundResultMsg, TStageMsg, TStakeResultMsg, TUpdateGameStateMsg } from "../api/ws/ws.messages"
+import { EWSMessage, TCardActionMsg, TChangeTurnMsg, TGameOverMsg, TNewTrumpMsg, TRoundResultMsg, TStageMsg, TStakeResultMsg, TUpdateGameStateMsg } from "../api/ws/ws.messages"
 import { TWsService, wsService } from "../api/ws/ws.service"
 import { ESuit, ICard } from "@/models/ICard"
 import { toast } from "react-toastify"
@@ -16,6 +16,7 @@ class GameService {
     this.ws.listen(EWSMessage.CardAction, this.onCardAction)
     this.ws.listen(EWSMessage.StakeResult, this.onStakeResult)
     this.ws.listen(EWSMessage.RoundResult, this.onRoundResult)
+    this.ws.listen(EWSMessage.GameOver, this.onGameOver)
   }
 
   public startGame = () => {
@@ -28,6 +29,12 @@ class GameService {
 
   public pickCard = (card: ICard) => {
     this.ws.send({ type: EWSAction.MoveCard, cardId: card.id })
+  }
+
+  private onGameOver = (msg: TGameOverMsg) => {
+    const gameStore = useGameStore.getState()
+    toast(`Team ${msg.winnerTeam} WIN THE GAME!!!`, { type: "success", autoClose: false })
+    gameStore.gameOver()
   }
 
   private onRoundResult = (msg: TRoundResultMsg) => {

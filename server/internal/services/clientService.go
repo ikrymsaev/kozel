@@ -25,6 +25,7 @@ type ClientService struct {
 	cardActionCh  chan *dto.CardActionEvent
 	stakeResultCh chan *dto.StakeResultEvent
 	roundResultCh chan *dto.RoundResultEvent
+	gameOverCh    chan *dto.GameOverEvent
 }
 
 func NewClientService(lobby *LobbyService, user *domain.User, conn *websocket.Conn) *ClientService {
@@ -43,6 +44,7 @@ func NewClientService(lobby *LobbyService, user *domain.User, conn *websocket.Co
 		cardActionCh:  make(chan *dto.CardActionEvent, 1),
 		stakeResultCh: make(chan *dto.StakeResultEvent, 1),
 		roundResultCh: make(chan *dto.RoundResultEvent, 1),
+		gameOverCh:    make(chan *dto.GameOverEvent, 1),
 	}
 }
 
@@ -76,6 +78,8 @@ func (c *ClientService) WriteMessage() {
 			c.Conn.WriteJSON(c.getStakeResultMsg(event))
 		case event := <-c.roundResultCh:
 			c.Conn.WriteJSON(c.getRoundResultMsg(event))
+		case event := <-c.gameOverCh:
+			c.Conn.WriteJSON(c.getGameOverMsg(event))
 		}
 	}
 }
@@ -253,5 +257,19 @@ func (c *ClientService) getRoundResultMsg(event *dto.RoundResultEvent) dto.Round
 	return dto.RoundResultMessage{
 		Type:   dto.WSMessageRoundResult,
 		Result: dto.GetRoundResultModel(event.Result),
+	}
+}
+
+func (c *ClientService) getGameOverMsg(event *dto.GameOverEvent) dto.GameOverMessage {
+	winnerTeam := func() byte {
+		if event.WinnerTeam == nil {
+			return 0
+		}
+		return event.WinnerTeam.Id
+	}()
+
+	return dto.GameOverMessage{
+		Type:       dto.WSMessageGameOver,
+		WinnerTeam: winnerTeam,
 	}
 }

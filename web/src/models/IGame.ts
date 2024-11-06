@@ -7,7 +7,7 @@ export enum EGameStage {
   PlayerStep,
   Calculation,
   DealerStep,
-  End
+  GameOver
 }
 
 export interface IGameState {

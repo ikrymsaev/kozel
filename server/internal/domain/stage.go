@@ -8,5 +8,5 @@ const (
 	StagePlayerStep  EStage = iota
 	StageCalculation EStage = iota
 	StageDealerStep  EStage = iota
-	StageEnd         EStage = iota
+	StageGameOver    EStage = iota
 )

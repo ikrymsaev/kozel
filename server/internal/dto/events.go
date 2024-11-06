@@ -17,6 +17,7 @@ const (
 	EventCardAction  ELobbyEvent = iota
 	EventStakeResult ELobbyEvent = iota
 	EventRoundResult ELobbyEvent = iota
+	EventGameOver    ELobbyEvent = iota
 )
 
 type ErrorEvent struct {
@@ -76,4 +77,9 @@ type StakeResultEvent struct {
 type RoundResultEvent struct {
 	Type   ELobbyEvent
 	Result *domain.RoundResult
+}
+
+type GameOverEvent struct {
+	Type       ELobbyEvent
+	WinnerTeam *domain.Team
 }

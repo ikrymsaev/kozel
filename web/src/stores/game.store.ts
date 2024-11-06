@@ -7,8 +7,10 @@ import { immer } from "zustand/middleware/immer";
 interface State {
   game: IGameState | null
   table: ICard[]
+  isGameOver: boolean
 }
 interface Actions {
+  gameOver: () => void;
   setRoundResult: (winnerTeam: number, score: number) => void
   updateGame: (game: IGameState) => void
   changeTurn: (playerId: string) => void
@@ -25,7 +27,13 @@ export const useGameStore = create<TGameStore>()(immer((set, get) => ({
   /** State */
   game: null,
   table: [],
+  isGameOver: false,
   /** Actions */
+  gameOver: () => set((state) => {
+    if (!state.game) return
+    state.game.stage = EGameStage.GameOver
+    state.isGameOver = true
+  }),
   setRoundResult: (winnerTeam: number, score: number) => set((state) => {
     if (!state.game) return
     if (winnerTeam < 1 || winnerTeam > 2) {

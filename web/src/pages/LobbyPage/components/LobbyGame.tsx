@@ -93,7 +93,7 @@ const GameStage = () => {
         return "Ход игрока"
       case EGameStage.DealerStep:
         return "Раздача карт"
-      case EGameStage.End:
+      case EGameStage.GameOver:
         return "Игра окончена"
       default:
         return ""

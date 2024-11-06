@@ -1,5 +1,5 @@
 import { TWSAction } from "./ws.actions"
-import { EWSMessage, isWsMsg, TCardActionMsg, TChangeTurnMsg, TConnectionMsg, TErrorMsg, TMsgMap, TNewMessageMsg, TNewTrumpMsg, TRoundResultMsg, TStageMsg, TStakeResultMsg, TUpdateGameStateMsg, TUpdateSlotsMsg, TWsMessage } from "./ws.messages"
+import { EWSMessage, isWsMsg, TCardActionMsg, TChangeTurnMsg, TConnectionMsg, TErrorMsg, TGameOverMsg, TMsgMap, TNewMessageMsg, TNewTrumpMsg, TRoundResultMsg, TStageMsg, TStakeResultMsg, TUpdateGameStateMsg, TUpdateSlotsMsg, TWsMessage } from "./ws.messages"
 import { WS } from "./ws"
 
 type Listeners = {
@@ -23,6 +23,7 @@ class WSService extends WS {
     [EWSMessage.CardAction]: new Set(),
     [EWSMessage.StakeResult]: new Set(),
     [EWSMessage.RoundResult]: new Set(),
+    [EWSMessage.GameOver]: new Set(),
   }
 
   public connect(params: string) {
@@ -48,38 +49,53 @@ class WSService extends WS {
       const message = JSON.parse(e.data) as TWsMessage
       console.log('WS: ', message)
       /** Кто-то подключился\отключился */
-      if (isWsMsg<TConnectionMsg>(message, EWSMessage.Connection))
+      if (isWsMsg<TConnectionMsg>(message, EWSMessage.Connection)) {
         return this.listeners[EWSMessage.Connection].forEach((cb) => cb(message))
+      }
       /** Новое сообщение в чате */
-      if (isWsMsg<TNewMessageMsg>(message, EWSMessage.NewMessage))
+      if (isWsMsg<TNewMessageMsg>(message, EWSMessage.NewMessage)){
         return this.listeners[EWSMessage.NewMessage].forEach((cb) => cb(message))
+      }
       /** Слоты в лобби обновились */
-      if (isWsMsg<TUpdateSlotsMsg>(message, EWSMessage.UpdateSlots))
+      if (isWsMsg<TUpdateSlotsMsg>(message, EWSMessage.UpdateSlots)) {
         return this.listeners[EWSMessage.UpdateSlots].forEach((cb) => cb(message))
+      }
       /** Ошибка */
-      if (isWsMsg<TErrorMsg>(message, EWSMessage.Error))
+      if (isWsMsg<TErrorMsg>(message, EWSMessage.Error)) {
         return this.listeners[EWSMessage.Error].forEach((cb) => cb(message))
+      }
       /** Обновилось состояние игры */
-      if (isWsMsg<TUpdateGameStateMsg>(message, EWSMessage.UpdateGameState))
+      if (isWsMsg<TUpdateGameStateMsg>(message, EWSMessage.UpdateGameState)) {
         return this.listeners[EWSMessage.UpdateGameState].forEach((cb) => cb(message))
+      }
       /** Стадия игры изменилась */
-      if (isWsMsg<TStageMsg>(message, EWSMessage.Stage))
+      if (isWsMsg<TStageMsg>(message, EWSMessage.Stage)) {
         return this.listeners[EWSMessage.Stage].forEach((cb) => cb(message))
+      }
       /** Новый козырь */
-      if (isWsMsg<TNewTrumpMsg>(message, EWSMessage.NewTrump))
+      if (isWsMsg<TNewTrumpMsg>(message, EWSMessage.NewTrump)) {
         return this.listeners[EWSMessage.NewTrump].forEach((cb) => cb(message))
+      }
       /** Смена хода */
-      if (isWsMsg<TChangeTurnMsg>(message, EWSMessage.ChangeTurn))
+      if (isWsMsg<TChangeTurnMsg>(message, EWSMessage.ChangeTurn)) {
         return this.listeners[EWSMessage.ChangeTurn].forEach((cb) => cb(message))
+      }
       /** Ход игрока */
-      if (isWsMsg<TCardActionMsg>(message, EWSMessage.CardAction))
+      if (isWsMsg<TCardActionMsg>(message, EWSMessage.CardAction)) {
         return this.listeners[EWSMessage.CardAction].forEach((cb) => cb(message))
+      }
       /** Результат кона */
-      if (isWsMsg<TStakeResultMsg>(message, EWSMessage.StakeResult))
+      if (isWsMsg<TStakeResultMsg>(message, EWSMessage.StakeResult)) {
         return this.listeners[EWSMessage.StakeResult].forEach((cb) => cb(message))
+      }
       /** Результат раунда */
-      if (isWsMsg<TRoundResultMsg>(message, EWSMessage.RoundResult))
+      if (isWsMsg<TRoundResultMsg>(message, EWSMessage.RoundResult)) {
         return this.listeners[EWSMessage.RoundResult].forEach((cb) => cb(message))
+      }
+      /** Игра закончилась */
+      if (isWsMsg<TGameOverMsg>(message, EWSMessage.GameOver)) {
+        return this.listeners[EWSMessage.GameOver].forEach((cb) => cb(message))
+      }
       console.error('Unknown message: ', message)
     } catch (e) {
       console.error('Failed to parse message: ', e)

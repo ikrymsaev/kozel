@@ -233,6 +233,21 @@ func (g *GameService) setTrump(trump *domain.ESuit) {
 }
 
 func (g *GameService) Run() {
+	gameWinner := g.GetGameWinner()
+	if gameWinner != nil {
+		for client := range g.LobbyService.Clients {
+			client.stageCh <- &dto.StageChangeEvent{
+				Type:  dto.EventStageChange,
+				Stage: domain.StageGameOver,
+			}
+			client.gameOverCh <- &dto.GameOverEvent{
+				Type:       dto.EventGameOver,
+				WinnerTeam: gameWinner,
+			}
+		}
+		return
+	}
+
 	g.Game.Start()
 	round := &g.Game.CurrentRound
 	fmt.Printf("Current Round FirstStepPlayer %v\n", round.FirstStepPlayer)
@@ -257,4 +272,18 @@ func (g *GameService) Run() {
 			g.BotMoveCard(round.FirstStepPlayer)
 		}
 	}
+}
+
+func (g *GameService) GetGameWinner() *domain.Team {
+	score := g.Game.Score
+
+	if score[0] >= 12 {
+		return &g.Game.Teams[0]
+	}
+
+	if score[1] >= 12 {
+		return &g.Game.Teams[1]
+	}
+
+	return nil
 }
