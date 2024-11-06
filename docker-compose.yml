@@ -12,6 +12,8 @@ services:
     restart: unless-stopped
     volumes:
       - .:/go-kozel-server
+    networks:
+      - koznet
   web:
     container_name: go-kozel-web
     build:
@@ -21,3 +23,8 @@ services:
       - 3000:80
     hostname: go-kozel-web
     restart: unless-stopped
+    networks:
+      - koznet
+
+networks:
+  koznet:
