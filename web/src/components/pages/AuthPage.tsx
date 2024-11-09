@@ -56,9 +56,9 @@ export const AuthPage = () => {
   }
 
   return (
-    <div className="flex flex-col flex-grow w-full p-4">
+    <div className="flex flex-col flex-grow justify-center w-full p-4 bg-emerald-900 text-white min-h-screen">
       <Text type="header" className="text-center">
-        {formType === "signUp" ? "Sign Up" : "Sign In"}
+        {formType === "signUp" ? "Регистрация" : "Войти"}
       </Text>
       <div className="flex flex-col gap-4 p-4">
         {formType === "signIn" && (
@@ -76,13 +76,14 @@ export const AuthPage = () => {
           </form>
         )}
       </div>
-      <div className="flex justify-center">
+      <div className="flex justify-center mt-10">
         <Button
           mode="bezeled"
+          color="transparent"
           loading={loading}
           onClick={() => setFormType(formType === "signUp" ? "signIn" : "signUp")}
         >
-          go to {formType === "signUp" ? "sign In" : "sign Up"}
+          {formType === "signUp" ? "войти" : "регистрация"}
         </Button>
       </div>
     </div>
