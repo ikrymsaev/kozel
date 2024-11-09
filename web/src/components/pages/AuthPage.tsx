@@ -56,8 +56,8 @@ export const AuthPage = () => {
   }
 
   return (
-    <div className="flex flex-col flex-grow justify-center w-full p-4 bg-emerald-900 text-white min-h-screen">
-      <Text type="header" className="text-center">
+    <div className="flex flex-col flex-grow justify-center w-full p-4 bg-emerald-900 min-h-screen">
+      <Text type="header" className="text-center text-white">
         {formType === "signUp" ? "Регистрация" : "Войти"}
       </Text>
       <div className="flex flex-col gap-4 p-4">
