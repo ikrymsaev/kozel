@@ -1,5 +1,7 @@
 package domain
 
+import "fmt"
+
 // Результат кона
 type StakeResult struct {
 	Winner *Player
@@ -27,7 +29,7 @@ func (s *Stake) Start() StakeResult {
 		s.Turn()
 	}
 
-	winCard := GetWinCard(&s.Table)
+	winCard := GetWinCard(s.Table)
 
 	return StakeResult{
 		Winner: winCard.Owner,
@@ -41,7 +43,8 @@ func (s *Stake) SetPlayerTurn(player *Player) {
 
 func (s *Stake) CalcResult() StakeResult {
 	println("Getting stake result...")
-	winCard := GetWinCard(&s.Table)
+	fmt.Printf("Table: %v\n", s.Table)
+	winCard := GetWinCard(s.Table)
 	return StakeResult{
 		Winner: winCard.Owner,
 		Bribe:  s.Table,

@@ -35,7 +35,7 @@ func (p *Player) GetCard(card *Card) {
 // Ход игрока
 func (p *Player) Action(stake *Stake) *Card {
 	var actionCard *Card
-	if IsFirstStep(&stake.Table) {
+	if len(stake.Table) == 0 {
 		actionCard = p.firstStepLogic(stake) // Первый ход
 	} else {
 		actionCard = p.otherStepsLogic(stake) // Не первый ход
@@ -77,6 +77,7 @@ func (p *Player) otherStepsLogic(stake *Stake) *Card {
 	stackSuit := stake.GetStakeSuit()
 	isTrumpStack := stackSuit == stake.round.Trump
 	myTrumpCards := GetCardsBySuit(stake.round.Trump, &p.Hand)
+	myJacks := GetJacks(&p.Hand)
 
 	// Заход не по козырю
 	if !isTrumpStack {
@@ -87,9 +88,8 @@ func (p *Player) otherStepsLogic(stake *Stake) *Card {
 		if len(myTrumpCards) > 0 {
 			return myTrumpCards[0]
 		}
-		jacks := GetJacks(&p.Hand)
-		if len(jacks) > 0 {
-			return jacks[0]
+		if len(myJacks) > 0 {
+			return myJacks[0]
 		}
 		return p.Hand[0]
 	}
@@ -97,14 +97,14 @@ func (p *Player) otherStepsLogic(stake *Stake) *Card {
 	/*
 	 ? Кон по козырю
 	*/
-	winCard := GetWinCard(&stake.Table)
-	isOurBribe := p.isOurBribe(&stake.Table)
+	winCard := GetWinCard(stake.Table)
+	isOurBribe := p.isOurBribe(stake.Table)
 	// Если взятка не наша
 	if !isOurBribe {
 		fmt.Println("!isOurBribe")
 		// TODO Если смогу перебить
-		if len(myTrumpCards) == 0 {
-			return p.Hand[0]
+		if len(myTrumpCards) == 0 && len(myJacks) == 0 {
+			return GetSmallestScoreCard(&p.Hand) //? Or biggest
 		}
 		isStartsWithJack := stake.Table[0].CardType.Type == Jack
 		if isStartsWithJack {
@@ -154,7 +154,7 @@ func (p *Player) otherStepsLogic(stake *Stake) *Card {
 	return GetBestScoreCard(&p.Hand)
 }
 
-func (p *Player) isOurBribe(cards *[]*Card) bool {
+func (p *Player) isOurBribe(cards []*Card) bool {
 	winCard := GetWinCard(cards)
 	isOurBribe := winCard.Owner.Team == p.Team
 	return isOurBribe
@@ -174,7 +174,7 @@ func (p *Player) getJacksInGame(stake *Stake) []*Card {
 
 	for _, card := range stake.round.Deck.Cards {
 		if card.CardType.Type == Jack && !card.IsUsed && card.Owner != p {
-			jacks = append(jacks, &card)
+			jacks = append(jacks, card)
 		}
 	}
 	return jacks

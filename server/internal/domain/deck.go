@@ -6,20 +6,21 @@ import (
 )
 
 type Deck struct {
-	Cards [32]Card
+	Cards [32]*Card
 }
 
 func NewDeck() Deck {
-	var cards [32]Card
+	var cards [32]*Card
 	var i byte = 0
 	for _, suit := range CARD_SUITS {
 		for _, cardType := range CARD_TYPES {
 			uri := fmt.Sprintf("images/%d.jpg", i+1)
-			cards[i] = NewCard(cardType, suit, uri)
+			card := NewCard(cardType, suit, uri)
+			cards[i] = card
 			i++
 		}
 	}
-	return Deck{cards}
+	return Deck{Cards: cards}
 }
 
 // Перемашать колоду
@@ -34,6 +35,7 @@ func (d *Deck) Shuffle() {
 func (d *Deck) SetTrump(suit *ESuit) {
 	for _, card := range d.Cards {
 		if card.CardSuit.Suit == *suit || card.CardType.Type == Jack {
+
 			card.SetTrump()
 		}
 	}
@@ -51,7 +53,7 @@ func (d *Deck) GetJacksInGame() []*Card {
 	var jacks []*Card
 	for _, card := range d.Cards {
 		if card.CardType.Type == Jack && !card.IsUsed {
-			jacks = append(jacks, &card)
+			jacks = append(jacks, card)
 		}
 	}
 	return jacks
@@ -71,7 +73,7 @@ func (d *Deck) GetOlderTrumpInGame() *Card {
 	for _, card := range d.Cards {
 		if card.IsTrump && card.CardType.Type != Jack && !card.IsUsed {
 			if olderTrump == nil || card.CardSuit.Order > olderTrump.CardSuit.Order {
-				olderTrump = &card
+				olderTrump = card
 			}
 		}
 	}
@@ -83,7 +85,7 @@ func (d *Deck) GetTrumpsInGame() []*Card {
 
 	for _, card := range d.Cards {
 		if card.IsTrump && card.CardType.Type != Jack && !card.IsUsed {
-			trumps = append(trumps, &card)
+			trumps = append(trumps, card)
 		}
 	}
 	return trumps
@@ -93,7 +95,7 @@ func (d *Deck) GetSuitsInGame(suit *ESuit) []*Card {
 	cards := make([]*Card, 0)
 	for _, card := range d.Cards {
 		if card.CardType.Type != Jack && !card.IsUsed && card.CardSuit.Suit == *suit {
-			cards = append(cards, &card)
+			cards = append(cards, card)
 		}
 	}
 	return cards

@@ -16,11 +16,11 @@ type Card struct {
 	Owner    *Player
 }
 
-func NewCard(cardType CardType, cardSuit CardSuit, imageUri string) Card {
+func NewCard(cardType CardType, cardSuit CardSuit, imageUri string) *Card {
 
 	// NewCard creates a new Card instance with the given card type, card suit, and image URI.
 	// The card is initially marked as not used and is considered a trump card if its type is Jack.
-	return Card{
+	return &Card{
 		Id:       uuid.New().String(),
 		ImageUri: imageUri,
 		CardType: cardType,
@@ -43,5 +43,5 @@ func (c *Card) SetUsed() {
 }
 
 func (c *Card) String() string {
-	return fmt.Sprintf("%s%s", c.CardType.Name, c.CardSuit.Name)
+	return fmt.Sprintf("%s%s - %v", c.CardType.Name, c.CardSuit.Name, c.IsTrump)
 }

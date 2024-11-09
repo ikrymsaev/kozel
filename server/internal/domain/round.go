@@ -148,9 +148,9 @@ func (r *Round) getFirstStepPlayer() *Player {
 }
 
 func (r *Round) dealCards() {
-	cards := &r.Deck.Cards
+	cards := r.Deck.Cards
 	for i := range cards {
-		card := &cards[i]
+		card := cards[i]
 		isPraiserCard := (card.CardSuit.Suit == Tref && card.CardType.Type == Jack) // TODO: refactor
 
 		if i < 8 {

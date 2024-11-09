@@ -1,17 +1,13 @@
 package domain
 
 import (
+	"fmt"
 	"math/rand"
 )
 
-// Является ли первым ходом
-func IsFirstStep(cards *[]*Card) bool {
-	return len(*cards) == 0
-}
-
 func IsWePraiser(player *Player, stake *Stake) bool {
-	praiserTeam := stake.round.Praiser.Team
-	return player.Team == praiserTeam
+	praiserTeamId := stake.round.Praiser.Team.Id
+	return player.Team.Id == praiserTeamId
 }
 
 func GetTrumpCards(cards *[]*Card) []*Card {
@@ -177,13 +173,13 @@ func GetRandomCard(cards *[]*Card) *Card {
 	return (*cards)[0]
 }
 
-func GetWinCard(cards *[]*Card) *Card {
-	if len(*cards) == 0 {
+func GetWinCard(cards []*Card) *Card {
+	if len(cards) == 0 {
 		return nil
 	}
-	winCard := (*cards)[0]
+	winCard := cards[0]
 
-	for _, card := range *cards {
+	for _, card := range cards {
 		winCard = GetOlderCard(winCard, card)
 	}
 
@@ -191,6 +187,7 @@ func GetWinCard(cards *[]*Card) *Card {
 }
 
 func GetOlderCard(card_1 *Card, card_2 *Card) *Card {
+	fmt.Printf("GetOlderCard: %v, %v\n", card_1, card_2)
 	if card_1.IsTrump {
 		if !card_2.IsTrump {
 			return card_1
