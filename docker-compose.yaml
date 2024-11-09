@@ -10,7 +10,9 @@ services:
     hostname: go-kozel-server
     restart: always
     volumes:
-      - .:/go-kozel-server
+      - ./pb_data:/bin/pb_data
+      - ./pb_public:/bin/pb_public 
+      - ./pb_migrations:bin/pb_migrations
   web:
     container_name: go-kozel-web
     build:
