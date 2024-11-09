@@ -6,7 +6,6 @@ services:
       context: ./server
       dockerfile: Dockerfile
     ports:
-      - 8080:8080
       - 8090:8090
     hostname: go-kozel-server
     restart: always
