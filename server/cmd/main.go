@@ -1,16 +1,16 @@
 package main
 
 import (
+	"go-kozel/internal/game"
+	"go-kozel/internal/hub"
 	"go-kozel/internal/infrastructure/pb"
-	"go-kozel/internal/services"
-	router "go-kozel/internal/transport/http"
 )
 
 func main() {
-	go pb.Run()
+	hub := hub.NewHub()
+	go hub.Run()
+	hubService := game.NewLobbyHub(hub)
 
-	hub := services.NewHub()
-
-	router.InitRouter(hub)
-	router.Start(":8080")
+	app := pb.New()
+	app.Run(hubService)
 }

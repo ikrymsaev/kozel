@@ -22,12 +22,14 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@api/*": ["src/api/*"],
       "@assets/*": ["src/assets/*"],
       "@models/*": ["src/models/*"],
       "@services/*": ["src/services/*"],
       "@stores/*": ["src/stores/*"],
-      "@icons/*": ["src/icons/*"],
-      "@ui-kit/*": ["src/ui-kit/*"],
+      "@icons/*": ["src/shared/icons/*"],
+      "@ui-kit/*": ["src/shared/ui-kit/*"],
+      "@components/*": ["src/components/*"],
     },
   },
   "include": ["src"]

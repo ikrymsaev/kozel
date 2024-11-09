@@ -19,8 +19,6 @@ export const Button = ({
 }: Props) => {
 
   const handleClick = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
-    e.preventDefault()
-    e.stopPropagation()
     if (loading) return;
     onClick?.(e)
   }

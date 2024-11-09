@@ -52,7 +52,9 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
+	github.com/labstack/echo/v4 v4.9.0 // indirect
 	github.com/labstack/echo/v5 v5.0.0-20230722203903-ec5b858dab61 // indirect
+	github.com/labstack/gommon v0.3.1 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -98,6 +100,7 @@ require (
 )
 
 require (
+	github.com/CorrectRoadH/echo-sse v0.1.4
 	github.com/gin-contrib/cors v1.7.2
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3

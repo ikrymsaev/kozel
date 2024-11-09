@@ -1,4 +1,4 @@
-package services
+package game
 
 import (
 	"fmt"
@@ -6,24 +6,24 @@ import (
 	"go-kozel/internal/dto"
 )
 
-type LobbyService struct {
+type Lobby struct {
 	Id            string
 	Name          string
 	Lobby         *domain.Lobby
-	GameService   *GameService
-	Clients       map[*ClientService]bool
-	hub           *Hub
+	GameService   *Game
+	Clients       map[*WsClient]bool
+	hub           *LobbyHub
 	chatCh        chan *dto.ChatEvent
 	connectionsCh chan *dto.ConnectionEvent
 	updateCh      chan *dto.UpdateEvent
 }
 
-func NewLobbyService(id string, name string, hub *Hub) *LobbyService {
-	return &LobbyService{
+func NewLobby(id string, name string, hub *LobbyHub) *Lobby {
+	return &Lobby{
 		Id:            id,
 		Name:          name,
 		Lobby:         domain.NewLobby(id, name),
-		Clients:       make(map[*ClientService]bool),
+		Clients:       make(map[*WsClient]bool),
 		hub:           hub,
 		chatCh:        make(chan *dto.ChatEvent, 1),
 		connectionsCh: make(chan *dto.ConnectionEvent, 1),
@@ -31,7 +31,7 @@ func NewLobbyService(id string, name string, hub *Hub) *LobbyService {
 	}
 }
 
-func (l *LobbyService) AddClient(client *ClientService) error {
+func (l *Lobby) AddClient(client *WsClient) error {
 	if err := l.Lobby.ConnectPlayer(client.User); err != nil {
 		return err
 	}
@@ -52,14 +52,14 @@ func (l *LobbyService) AddClient(client *ClientService) error {
 	return nil
 }
 
-func (l *LobbyService) RemoveClient(client *ClientService) {
+func (l *Lobby) RemoveClient(client *WsClient) {
 	delete(l.Clients, client)
 
 	if err := l.Lobby.DisconnectPlayer(client.User); err != nil {
 		fmt.Println(err)
 	}
 	if len(l.Clients) == 0 {
-		l.hub.RemoveLobby(l.Id)
+		l.hub.removeLobby(l.Id)
 		return
 	}
 	event := dto.ConnectionEvent{
@@ -70,7 +70,7 @@ func (l *LobbyService) RemoveClient(client *ClientService) {
 	l.sendUpdates()
 }
 
-func (l *LobbyService) MoveSlot(client *ClientService, from int, to int) {
+func (l *Lobby) MoveSlot(client *WsClient, from int, to int) {
 	if client.User.ID != l.Lobby.OwnerId {
 		fmt.Println("Only owner can move slot")
 		return
@@ -80,7 +80,7 @@ func (l *LobbyService) MoveSlot(client *ClientService, from int, to int) {
 }
 
 // Старт игры
-func (l *LobbyService) StartGame(cl *ClientService) {
+func (l *Lobby) StartGame(cl *WsClient) {
 	if l.GameService != nil {
 		cl.errorCh <- &dto.ErrorEvent{
 			Type:  dto.EventError,
@@ -100,7 +100,7 @@ func (l *LobbyService) StartGame(cl *ClientService) {
 	go gameService.Run()
 }
 
-func (l *LobbyService) sendUpdates() {
+func (l *Lobby) sendUpdates() {
 	event := dto.UpdateEvent{
 		Type:  dto.EventUpdate,
 		Slots: l.Lobby.GetSlots(),
@@ -109,7 +109,7 @@ func (l *LobbyService) sendUpdates() {
 	l.updateCh <- &event
 }
 
-func (l *LobbyService) Run() {
+func (l *Lobby) Run() {
 	for {
 		select {
 		case event := <-l.connectionsCh:

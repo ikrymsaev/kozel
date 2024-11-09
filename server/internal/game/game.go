@@ -1,4 +1,4 @@
-package services
+package game
 
 import (
 	"fmt"
@@ -7,21 +7,21 @@ import (
 	"time"
 )
 
-type GameService struct {
+type Game struct {
 	Game         *domain.Game
-	LobbyService *LobbyService
+	LobbyService *Lobby
 }
 
-func NewGameService(lobby *LobbyService) GameService {
+func NewGameService(lobby *Lobby) Game {
 	game := domain.NewGame(lobby.Lobby)
 
-	return GameService{
+	return Game{
 		Game:         &game,
 		LobbyService: lobby,
 	}
 }
 
-func (g *GameService) MoveCard(cl *ClientService, cardId string) {
+func (g *Game) MoveCard(cl *WsClient, cardId string) {
 	if g.Game.Stage != domain.StagePlayerStep {
 		cl.errorCh <- &dto.ErrorEvent{
 			Type:  dto.EventError,
@@ -68,7 +68,7 @@ func (g *GameService) MoveCard(cl *ClientService, cardId string) {
 	g.NextTurn()
 }
 
-func (g *GameService) FinishStake() {
+func (g *Game) FinishStake() {
 	stake := g.Game.CurrentRound.CurrentStake
 
 	stage := domain.StageCalculation
@@ -119,7 +119,7 @@ func (g *GameService) FinishStake() {
 	}
 }
 
-func (g *GameService) NextRound() {
+func (g *Game) NextRound() {
 	round := &g.Game.CurrentRound
 	result := round.GetResult()
 
@@ -139,7 +139,7 @@ func (g *GameService) NextRound() {
 	g.Run()
 }
 
-func (g *GameService) NextTurn() {
+func (g *Game) NextTurn() {
 	stake := g.Game.CurrentRound.CurrentStake
 
 	if stake.IsCompleted() {
@@ -162,7 +162,7 @@ func (g *GameService) NextTurn() {
 	}
 }
 
-func (g *GameService) BotMoveCard(bot *domain.Player) {
+func (g *Game) BotMoveCard(bot *domain.Player) {
 	stake := g.Game.CurrentRound.CurrentStake
 	fmt.Printf("Bot action player: %v\n", bot)
 	// Action by Bot
@@ -182,7 +182,7 @@ func (g *GameService) BotMoveCard(bot *domain.Player) {
 	g.NextTurn()
 }
 
-func (g *GameService) PraiseTrump(cl *ClientService, trump *domain.ESuit) {
+func (g *Game) PraiseTrump(cl *WsClient, trump *domain.ESuit) {
 	round := &g.Game.CurrentRound
 
 	praiserId := round.Praiser.Id
@@ -208,7 +208,7 @@ func (g *GameService) PraiseTrump(cl *ClientService, trump *domain.ESuit) {
 	}
 }
 
-func (g *GameService) setTrump(trump *domain.ESuit) {
+func (g *Game) setTrump(trump *domain.ESuit) {
 	round := &g.Game.CurrentRound
 	round.SetTrump(trump)
 	g.Game.SetStage(domain.StagePlayerStep)
@@ -232,7 +232,7 @@ func (g *GameService) setTrump(trump *domain.ESuit) {
 	}
 }
 
-func (g *GameService) Run() {
+func (g *Game) Run() {
 	gameWinner := g.GetGameWinner()
 	if gameWinner != nil {
 		for client := range g.LobbyService.Clients {
@@ -274,7 +274,7 @@ func (g *GameService) Run() {
 	}
 }
 
-func (g *GameService) GetGameWinner() *domain.Team {
+func (g *Game) GetGameWinner() *domain.Team {
 	score := g.Game.Score
 
 	if score[0] >= 12 {

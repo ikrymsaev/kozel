@@ -1,12 +1,12 @@
-import { ILobbySlot } from "../../../models/ILobby"
-import { useAuthStore } from "../../../stores/auth.store"
-import { useLobbyStore } from "../../../stores/lobby.store"
 import cn from "classnames"
 import UpIcon from "/icons/up.svg"
 import DownIcon from "/icons/down.svg"
-import { lobbyService } from "../../../services/lobby.service"
 import { useSearchParams } from "react-router-dom"
 import { Text } from "@/shared/ui-kit/Text"
+import { useLobbyStore } from "@/stores/lobby.store"
+import { ILobbySlot } from "@/models/ILobby"
+import { useAuthStore } from "@/stores/auth.store"
+import { lobbyService } from "@/services/lobby.service"
 
 export const LobbySlots = () => {
   const slots = useLobbyStore((state) => state.slots)

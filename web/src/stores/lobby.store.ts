@@ -15,10 +15,14 @@ interface Actions {
 type TLobbyStore = State & Actions;
 
 export const useLobbyStore = create<TLobbyStore>()(immer((set) => ({
-  /** State */
+  /**
+   * *State
+   */
   activeGames: [],
   slots: [],
-  /** Actions */
+  /**
+   * *Actions
+   */
   setActiveGames: (activeGames: ILobby[]) => {
     set({ activeGames })
   },

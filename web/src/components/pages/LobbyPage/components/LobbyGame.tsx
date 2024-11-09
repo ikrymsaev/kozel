@@ -112,11 +112,11 @@ const PlayersCards = () => {
   const getPlayerName = useGameStore((state) => state.getPlayerName)
 
   return (
-    <div className="flex flex-row gap-4">
+    <div className="flex flex-col-reverse md:flex-row gap-4">
       <div className="flex flex-col gap-4 flex-1">
         {game?.players.map((player) => (
           <div key={player.id} className={cn(
-            "flex flex-col gap-1 min-h-28 px-4 py-2 justify-center rounded-md text-black font-semibold",
+            "flex flex-col gap-1 min-h-28 md:px-4 md:py-2 justify-center rounded-md text-black font-semibold",
             player.team === 1 && "bg-sky-400",
             player.team === 2 && "bg-red-400",
           )}>

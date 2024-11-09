@@ -1,8 +1,5 @@
-import { MainLayout } from "../layouts/MainLayout/MainLayout"
 import { useEffect } from "react"
-import { useSettingsStore } from "../../stores/settings.store"
 import { useSearchParams } from "react-router-dom"
-import { lobbyService } from "../../services/lobby.service"
 import { LobbySlots } from "./components/LobbySlots"
 import { LobbyChat } from "./components/LobbyChat"
 import { Button } from "@/shared/ui-kit/Button"
@@ -10,6 +7,9 @@ import { gameService } from "@/services/game.service"
 import { useGameStore } from "@/stores/game.store"
 import { LobbyGame } from "./components/LobbyGame"
 import { useAuthStore } from "@/stores/auth.store"
+import { useSettingsStore } from "@/stores/settings.store"
+import { lobbyService } from "@/services/lobby.service"
+import { MainLayout } from "@/components/layouts/MainLayout/MainLayout"
 
 export const LobbyPage = () => {
   const [searchParams] = useSearchParams();

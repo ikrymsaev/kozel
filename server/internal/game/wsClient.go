@@ -1,4 +1,4 @@
-package services
+package game
 
 import (
 	"encoding/json"
@@ -10,9 +10,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type ClientService struct {
+type WsClient struct {
 	Conn          *websocket.Conn
-	LobbyService  *LobbyService
+	LobbyService  *Lobby
 	User          *domain.User
 	chatCh        chan *dto.ChatEvent
 	connectionsCh chan *dto.ConnectionEvent
@@ -28,8 +28,8 @@ type ClientService struct {
 	gameOverCh    chan *dto.GameOverEvent
 }
 
-func NewClientService(lobby *LobbyService, user *domain.User, conn *websocket.Conn) *ClientService {
-	return &ClientService{
+func NewWsClient(lobby *Lobby, user *domain.User, conn *websocket.Conn) *WsClient {
+	return &WsClient{
 		Conn:          conn,
 		LobbyService:  lobby,
 		User:          user,
@@ -49,7 +49,7 @@ func NewClientService(lobby *LobbyService, user *domain.User, conn *websocket.Co
 }
 
 // Отправляем сообщения клиенту
-func (c *ClientService) WriteMessage() {
+func (c *WsClient) WriteMessage() {
 	defer func() {
 		c.Conn.Close()
 	}()
@@ -85,7 +85,7 @@ func (c *ClientService) WriteMessage() {
 }
 
 // Получаем сообщения от клиента
-func (c *ClientService) ReadMessage() {
+func (c *WsClient) ReadMessage() {
 	defer func() {
 		c.Conn.Close()
 	}()
@@ -122,7 +122,7 @@ func (c *ClientService) ReadMessage() {
 	}
 }
 
-func (c *ClientService) parseMoveCardAction(recievedMessage []byte) {
+func (c *WsClient) parseMoveCardAction(recievedMessage []byte) {
 	var wsMessage = dto.MoveCardAction{}
 	marshalErr := json.Unmarshal(recievedMessage, &wsMessage)
 	if marshalErr != nil {
@@ -132,11 +132,11 @@ func (c *ClientService) parseMoveCardAction(recievedMessage []byte) {
 	c.LobbyService.GameService.MoveCard(c, wsMessage.CardId)
 }
 
-func (c *ClientService) parseStartGameAction() {
+func (c *WsClient) parseStartGameAction() {
 	c.LobbyService.StartGame(c)
 }
 
-func (c *ClientService) parsePraiseTrumpAction(recievedMessage []byte) {
+func (c *WsClient) parsePraiseTrumpAction(recievedMessage []byte) {
 	var wsMessage = dto.PraiseTrumpAction{}
 	marshalErr := json.Unmarshal(recievedMessage, &wsMessage)
 	if marshalErr != nil {
@@ -146,7 +146,7 @@ func (c *ClientService) parsePraiseTrumpAction(recievedMessage []byte) {
 	c.LobbyService.GameService.PraiseTrump(c, &wsMessage.Trump)
 }
 
-func (c *ClientService) parseMoveSlotAction(recievedMessage []byte) {
+func (c *WsClient) parseMoveSlotAction(recievedMessage []byte) {
 	var wsMessage = dto.MoveSlotAction{}
 	marshalErr := json.Unmarshal(recievedMessage, &wsMessage)
 	if marshalErr != nil {
@@ -157,7 +157,7 @@ func (c *ClientService) parseMoveSlotAction(recievedMessage []byte) {
 	c.LobbyService.MoveSlot(c, wsMessage.From, wsMessage.To)
 }
 
-func (c *ClientService) parseSendMsgAction(recievedMessage []byte) {
+func (c *WsClient) parseSendMsgAction(recievedMessage []byte) {
 	var wsMessage = map[string]interface{}{}
 	marshalErr := json.Unmarshal(recievedMessage, &wsMessage)
 	if marshalErr != nil {
@@ -173,14 +173,14 @@ func (c *ClientService) parseSendMsgAction(recievedMessage []byte) {
 	c.LobbyService.chatCh <- &event
 }
 
-func (c *ClientService) getChatMsg(event *dto.ChatEvent) dto.ChatNewMessage {
+func (c *WsClient) getChatMsg(event *dto.ChatEvent) dto.ChatNewMessage {
 	return dto.ChatNewMessage{
 		Type:    dto.WSMessageNewMessage,
 		Message: event.Message,
 		Sender:  event.Sender,
 	}
 }
-func (c *ClientService) getConnMsg(event *dto.ConnectionEvent) dto.ConnectionMessage {
+func (c *WsClient) getConnMsg(event *dto.ConnectionEvent) dto.ConnectionMessage {
 	fmt.Printf("getConnMsg: %v\n", event)
 	return dto.ConnectionMessage{
 		Type:        dto.WSMessageConnection,
@@ -188,19 +188,19 @@ func (c *ClientService) getConnMsg(event *dto.ConnectionEvent) dto.ConnectionMes
 		User:        event.User,
 	}
 }
-func (c *ClientService) getUpdateMsg(event *dto.UpdateEvent) dto.UpdateSlotsMessage {
+func (c *WsClient) getUpdateMsg(event *dto.UpdateEvent) dto.UpdateSlotsMessage {
 	return dto.UpdateSlotsMessage{
 		Type:  dto.WSMessageUpdateSlots,
 		Slots: event.Slots,
 	}
 }
-func (c *ClientService) getErrorMsg(event *dto.ErrorEvent) dto.ErrorMessage {
+func (c *WsClient) getErrorMsg(event *dto.ErrorEvent) dto.ErrorMessage {
 	return dto.ErrorMessage{
 		Type:  dto.WSMessageError,
 		Error: event.Error,
 	}
 }
-func (c *ClientService) getGameStateMsg(event *dto.GameStateEvent) dto.GameStateMessage {
+func (c *WsClient) getGameStateMsg(event *dto.GameStateEvent) dto.GameStateMessage {
 	gameModel := dto.NewGameStateModel(event.Game)
 
 	for index, player := range gameModel.Players {
@@ -218,27 +218,27 @@ func (c *ClientService) getGameStateMsg(event *dto.GameStateEvent) dto.GameState
 		Game: gameModel,
 	}
 }
-func (c *ClientService) getStageMsg(event *dto.StageChangeEvent) dto.StageMessage {
+func (c *WsClient) getStageMsg(event *dto.StageChangeEvent) dto.StageMessage {
 	return dto.StageMessage{
 		Type:  dto.WSMessageStage,
 		Stage: event.Stage,
 	}
 }
-func (c *ClientService) getTrumpMsg(event *dto.NewTrumpEvent) dto.NewTrumpMessage {
+func (c *WsClient) getTrumpMsg(event *dto.NewTrumpEvent) dto.NewTrumpMessage {
 	return dto.NewTrumpMessage{
 		Type:  dto.WSMEssageNewTrump,
 		Trump: event.Trump,
 	}
 }
 
-func (c *ClientService) getChangeStepMsg(event *dto.ChangeStepEvent) dto.ChangeTurnMessage {
+func (c *WsClient) getChangeStepMsg(event *dto.ChangeStepEvent) dto.ChangeTurnMessage {
 	return dto.ChangeTurnMessage{
 		Type:         dto.WSMessageChangeTurn,
 		TurnPlayerId: event.PlayerStep.Id,
 	}
 }
 
-func (c *ClientService) getCardActionMsg(event *dto.CardActionEvent) dto.CardActionMessage {
+func (c *WsClient) getCardActionMsg(event *dto.CardActionEvent) dto.CardActionMessage {
 	return dto.CardActionMessage{
 		Type:     dto.WSMessageCardAction,
 		PlayerId: event.PlayerId,
@@ -246,21 +246,21 @@ func (c *ClientService) getCardActionMsg(event *dto.CardActionEvent) dto.CardAct
 	}
 }
 
-func (c *ClientService) getStakeResultMsg(event *dto.StakeResultEvent) dto.StakeResultMessage {
+func (c *WsClient) getStakeResultMsg(event *dto.StakeResultEvent) dto.StakeResultMessage {
 	return dto.StakeResultMessage{
 		Type:   dto.WSMessageStakeResult,
 		Result: dto.GetStakeResultModel(event.Result),
 	}
 }
 
-func (c *ClientService) getRoundResultMsg(event *dto.RoundResultEvent) dto.RoundResultMessage {
+func (c *WsClient) getRoundResultMsg(event *dto.RoundResultEvent) dto.RoundResultMessage {
 	return dto.RoundResultMessage{
 		Type:   dto.WSMessageRoundResult,
 		Result: dto.GetRoundResultModel(event.Result),
 	}
 }
 
-func (c *ClientService) getGameOverMsg(event *dto.GameOverEvent) dto.GameOverMessage {
+func (c *WsClient) getGameOverMsg(event *dto.GameOverEvent) dto.GameOverMessage {
 	winnerTeam := func() byte {
 		if event.WinnerTeam == nil {
 			return 0

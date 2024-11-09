@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { lobbyService } from "../services/lobby.service";
-import { useLobbyStore } from "../stores/lobby.store";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/shared/ui-kit/Button";
 import { Text } from "@/shared/ui-kit/Text";
-import { MainLayout } from "./layouts/MainLayout/MainLayout";
+import { useConnectToHub } from "@/hooks/useConnectToHub";
+import { useLobbyStore } from "@/stores/lobby.store";
+import { lobbyService } from "@/services/lobby.service";
+import { MainLayout } from "../layouts/MainLayout/MainLayout";
 
 export const MainPage = () => {
   const navigate = useNavigate()
@@ -13,11 +14,10 @@ export const MainPage = () => {
   
   const [creating, setCreating] = useState(false);
 
+  useConnectToHub()
+
   useEffect(() => {
-    const unwatch = lobbyService.watchLobbies()
-    return () => {
-      unwatch()
-    }
+    lobbyService.fetchLobbyList()
   }, [])
 
   const handleNewGame = async () => {
@@ -38,7 +38,7 @@ export const MainPage = () => {
 
   return (
     <MainLayout>
-      <div className="flex flex-col items-center gap-4 w-full overflow-hidden">
+      <div className="flex flex-col items-center gap-4 w-full overflow-hidden p-4">
         <Text type="header" className="font-semibold">Main Page</Text>
         <Button size="m" disabled={creating} onClick={handleNewGame}>
           NEW GAME

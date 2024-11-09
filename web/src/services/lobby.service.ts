@@ -1,5 +1,4 @@
 import { toast } from "react-toastify"
-import { ILobby } from "../models/ILobby"
 import { useAuthStore } from "../stores/auth.store"
 import { useChatStore } from "../stores/chat.store"
 import { useLobbyStore } from "../stores/lobby.store"
@@ -7,6 +6,8 @@ import { EWSAction } from "../api/ws/ws.actions"
 import { TWsService, wsService } from "../api/ws/ws.service"
 import { EWSMessage, TConnectionMsg, TErrorMsg, TUpdateSlotsMsg } from "../api/ws/ws.messages"
 import { getApiUrl } from "@/shared/utils/get-api-url"
+import axios from "axios"
+import { ILobby } from "@/models/ILobby"
 
 class LobbyService {
   private readonly ws: TWsService
@@ -17,47 +18,17 @@ class LobbyService {
     this.ws.listen(EWSMessage.Error, this.onError)
   }
 
-  public getLobbyList = async () => {
-    const res = await fetch(getApiUrl() + '/hub/lobbies')
+  public fetchLobbyList = async () => {
+    const url = getApiUrl() + "/api/lobby/list"
+    const res = await fetch(url)
     const games = await res.json()
     useLobbyStore.setState({ activeGames: games })
   }
 
-  public watchLobbies = () => {
-    this.getLobbyList()
-
-    const { addLobby  } = useLobbyStore.getState()
-
-    const connect = () => {
-      const es = new EventSource(getApiUrl() + '/hub/watch_lobbies')
-      console.log("SSE opened, watching for lobbies...")
-      es.addEventListener('new_lobby', (event) => {
-        const data = JSON.parse(event.data) as ILobby
-        console.log("SSE new_lobby: ", data)
-        addLobby(data)
-      })
-  
-      es.addEventListener('remove_lobby', (event) => {
-        const lobbyId = event.data
-        console.log("SSE remove_lobby: ", lobbyId)
-        useLobbyStore.getState().removeLobby(lobbyId)
-      })
-      return {
-        es,
-        close: () => {
-          es.close()
-        },
-      }
-    }
-    const { es, close } = connect()
-    es.onerror = () => {
-      setTimeout(() => {
-        close()
-        connect()
-      }, 3000)
-    }
-
-    return close
+  public fetchNewLobby = async (id: string) => {
+    const url = getApiUrl() + "/api/lobby/" + id
+    const { data: lobby } = await axios.get<ILobby>(url)
+    useLobbyStore.getState().addLobby(lobby)
   }
 
   /** Create a new lobby */
@@ -65,14 +36,12 @@ class LobbyService {
     const user = useAuthStore.getState().user
     if (!user) return
 
-    const { id, username } = user;
-    let url = getApiUrl() +
-    "/lobby/new"
-    url += "?user_id=" + id;
-    url += "&username=" + username;
+    const url = getApiUrl() + "/api/lobby/new"
     try {
-      const res = await fetch(url)
-      const lobbyId = await res.json()
+      const { data: lobbyId } = await axios.get<{ data: string }>(
+        url,
+        {headers: {'Authorization': `Bearer ${useAuthStore.getState().token}`}}
+      )
       return lobbyId
     } catch (e) {
       console.error('Failed to create lobby: ', e)
@@ -82,10 +51,10 @@ class LobbyService {
   /** Join a lobby  */
   public joinLobby = async (lobbyId: string) => {
     const user = useAuthStore.getState().user
-    if (!user) return
-    let url = getApiUrl("ws") + "/lobby/join/" + lobbyId
-    url += "?user_id=" + user.id
-    url += "&username=" + user.username
+    const token = useAuthStore.getState().token
+    if (!user || !token) return
+    
+    const url = getApiUrl() + "/api/lobby/join/" + lobbyId + "/" + token
     try {
       return this.ws.connect(url)
     } catch (e) {
