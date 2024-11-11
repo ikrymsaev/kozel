@@ -29,7 +29,7 @@ func (p *App) Run(hubService *game.LobbyHub) {
 	controllers.NewLobbyController(p.Instance).Register(hubService)
 	p.Instance.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		// serves static files from the provided public dir (if exists)
-		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS("./static"), false))
+		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS("../static"), false))
 		return nil
 	})
 	p.Instance.Start()
