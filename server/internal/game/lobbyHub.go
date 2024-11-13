@@ -38,7 +38,6 @@ func (h *LobbyHub) CreateNewLobby(id string, name string) *Lobby {
 	newLobby := NewLobby(id, name, h)
 	h.Lobbies[id] = newLobby
 	log.Printf("lobby with id %s created", id)
-	go newLobby.Run()
 
 	log.Printf("lobby with id %s added to hub", id)
 	fmt.Printf("lobby hub ch %v", h.hub.LobbyCh)

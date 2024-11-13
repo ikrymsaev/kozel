@@ -40,7 +40,7 @@ const PraisingWindow = () => {
   }
 
   return (
-    <div className="flex flex-col fixed z-10 top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%] rounded-xl bg-white text-black px-8 py-4">
+    <div className="flex flex-col fixed z-10 top-4 left-[50%] -translate-x-[50%] rounded-xl bg-white text-black px-8 py-4">
       <Text type="subheader" className="text-center">Вы хвалите козырь</Text>
       <div className="flex flex-row flex-nowrap gap-4 justify-center py-4">
         <Text
@@ -109,6 +109,7 @@ const GameStage = () => {
 const PlayersCards = () => {
   const game = useGameStore((state) => state.game)
   const table = useGameStore((state) => state.table)
+  const me = useAuthStore((state) => state.user)
   const getPlayerName = useGameStore((state) => state.getPlayerName)
 
   return (
@@ -116,7 +117,8 @@ const PlayersCards = () => {
       <div className="flex flex-col gap-4 flex-1">
         {game?.players.map((player) => (
           <div key={player.id} className={cn(
-            "flex flex-col gap-1 min-h-28 md:px-4 md:py-2 justify-center rounded-md text-black font-semibold",
+            "flex flex-col gap-1 px-2 md:px-4 md:py-2 justify-center rounded-md text-black font-semibold",
+            player.id === me?.id && "min-h-28",
             player.team === 1 && "bg-sky-400",
             player.team === 2 && "bg-red-400",
           )}>
@@ -127,33 +129,35 @@ const PlayersCards = () => {
                 <Text type="sm-1" className="text-white font-bold">{" <<< ход"}</Text>
               )}
             </div>
-            <div className="flex gap-2 p-1">
-              {player.hand.map((card) => {
-                if (!card || card.isHidden) return (
-                  <span
-                    key={card.id}
-                    className={cn(
-                      "min-h-12 min-w-8 bg-gray-400",
-                      "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default",
-                    )}
-                  />
-                )
-                return (
-                  <span
-                    key={card.id}
-                    onClick={() => gameService.pickCard(card)}
-                    className={cn(
-                      (card.suit === ESuit.Booby || card.suit === ESuit.Chervy) ? "text-stopRed" : "text-black",
-                      "min-h-12 min-w-8",
-                      "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 hover:scale-105",
-                      card.isHidden ? "bg-gray-300 cursor-default" : card.isTrump ?  "bg-yellow-200 cursor-pointer" : "bg-white cursor-pointer",
-                    )}
-                  >
-                    {card.type}{card.suit}
-                  </span>
-                )
-              })}
-            </div>
+            {player.id  === me?.id && (
+              <div className="flex gap-2 p-1">
+                {player.hand.map((card) => {
+                  if (!card || card.isHidden) return (
+                    <span
+                      key={card.id}
+                      className={cn(
+                        "min-h-12 min-w-8 bg-gray-400",
+                        "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 cursor-default",
+                      )}
+                    />
+                  )
+                  return (
+                    <span
+                      key={card.id}
+                      onClick={() => gameService.pickCard(card)}
+                      className={cn(
+                        (card.suit === ESuit.Booby || card.suit === ESuit.Chervy) ? "text-stopRed" : "text-black",
+                        "min-h-12 min-w-8",
+                        "inline-flex justify-center text-sm px-1 py-3 rounded-md border-[1px] border-slate-900 hover:scale-105",
+                        card.isHidden ? "bg-gray-300 cursor-default" : card.isTrump ?  "bg-yellow-200 cursor-pointer" : "bg-white cursor-pointer",
+                      )}
+                    >
+                      {card.type}{card.suit}
+                    </span>
+                  )
+                })}
+                </div>
+            )}
           </div>
         ))}
       </div>

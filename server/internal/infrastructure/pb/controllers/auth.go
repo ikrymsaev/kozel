@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	pb_repositories "go-kozel/internal/infrastructure/pb/repositories"
 	"go-kozel/internal/services"
 	"log"
 
@@ -15,12 +16,14 @@ import (
 type AuthController struct {
 	app         *pocketbase.PocketBase
 	authService *services.AuthService
+	sessionRepo *pb_repositories.SessionsRepository
 }
 
 func NewAuthController(app *pocketbase.PocketBase) *AuthController {
 	return &AuthController{
 		app:         app,
 		authService: services.NewAuthService(app),
+		sessionRepo: pb_repositories.NewSessionsRepository(app),
 	}
 }
 
@@ -69,6 +72,8 @@ func (m *AuthController) signUp(c echo.Context) error {
 		return apis.NewApiError(500, err.Error(), nil)
 	}
 
+	m.sessionRepo.AddSessionLog(newUserRecord, c.RealIP())
+
 	log.Println("Returning auth token...")
 	return m.authService.GenUserAuthResult(c, newUserRecord)
 }
@@ -93,6 +98,8 @@ func (m *AuthController) signIn(c echo.Context) error {
 		err := fmt.Errorf("failed to get user")
 		return apis.NewApiError(500, err.Error(), nil)
 	}
+
+	m.sessionRepo.AddSessionLog(userRecord, c.RealIP())
 
 	log.Println("Returning auth token...")
 	return m.authService.GenUserAuthResult(c, userRecord)

@@ -170,7 +170,7 @@ func (c *WsClient) parseSendMsgAction(recievedMessage []byte) {
 		Message: message,
 		Sender:  *c.User,
 	}
-	c.LobbyService.chatCh <- &event
+	c.LobbyService.SendChatMessage(&event)
 }
 
 func (c *WsClient) getChatMsg(event *dto.ChatEvent) dto.ChatNewMessage {

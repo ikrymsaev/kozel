@@ -7,27 +7,21 @@ import (
 )
 
 type Lobby struct {
-	Id            string
-	Name          string
-	Lobby         *domain.Lobby
-	GameService   *Game
-	Clients       map[*WsClient]bool
-	hub           *LobbyHub
-	chatCh        chan *dto.ChatEvent
-	connectionsCh chan *dto.ConnectionEvent
-	updateCh      chan *dto.UpdateEvent
+	Id          string
+	Name        string
+	Lobby       *domain.Lobby
+	GameService *Game
+	Clients     map[*WsClient]bool
+	hub         *LobbyHub
 }
 
 func NewLobby(id string, name string, hub *LobbyHub) *Lobby {
 	return &Lobby{
-		Id:            id,
-		Name:          name,
-		Lobby:         domain.NewLobby(id, name),
-		Clients:       make(map[*WsClient]bool),
-		hub:           hub,
-		chatCh:        make(chan *dto.ChatEvent, 1),
-		connectionsCh: make(chan *dto.ConnectionEvent, 1),
-		updateCh:      make(chan *dto.UpdateEvent, 1),
+		Id:      id,
+		Name:    name,
+		Lobby:   domain.NewLobby(id, name),
+		Clients: make(map[*WsClient]bool),
+		hub:     hub,
 	}
 }
 
@@ -40,7 +34,9 @@ func (l *Lobby) AddClient(client *WsClient) error {
 		IsConnected: true,
 		User:        domain.User{ID: client.User.ID, Username: client.User.Username},
 	}
-	l.connectionsCh <- &event
+	for client := range l.Clients {
+		client.connectionsCh <- &event
+	}
 	l.sendUpdates()
 	if l.GameService != nil {
 		client.gameStateCh <- &dto.GameStateEvent{
@@ -66,7 +62,9 @@ func (l *Lobby) RemoveClient(client *WsClient) {
 		IsConnected: false,
 		User:        domain.User{ID: client.User.ID, Username: client.User.Username},
 	}
-	l.connectionsCh <- &event
+	for client := range l.Clients {
+		client.connectionsCh <- &event
+	}
 	l.sendUpdates()
 }
 
@@ -105,28 +103,13 @@ func (l *Lobby) sendUpdates() {
 		Type:  dto.EventUpdate,
 		Slots: l.Lobby.GetSlots(),
 	}
-
-	l.updateCh <- &event
+	for client := range l.Clients {
+		client.updateCh <- &event
+	}
 }
 
-func (l *Lobby) Run() {
-	for {
-		select {
-		case event := <-l.connectionsCh:
-			fmt.Printf("Lobby connectionsCh: %v\n", event)
-			for client := range l.Clients {
-				client.connectionsCh <- event
-			}
-		case event := <-l.chatCh:
-			fmt.Printf("Lobby chatCh: %v\n", event)
-			for client := range l.Clients {
-				client.chatCh <- event
-			}
-		case event := <-l.updateCh:
-			fmt.Printf("Lobby updateCh: %v\n", event)
-			for client := range l.Clients {
-				client.updateCh <- event
-			}
-		}
+func (l *Lobby) SendChatMessage(event *dto.ChatEvent) {
+	for client := range l.Clients {
+		client.chatCh <- event
 	}
 }
